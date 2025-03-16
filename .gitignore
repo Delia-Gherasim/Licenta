@@ -1,0 +1,50 @@
+# =================
+# React / Node.js
+# =================
+node_modules/
+build/
+dist/
+.env
+.npmrc
+.DS_Store
+*.log
+
+# Mac system files
+*.DS_Store
+
+# =================
+# Python
+# =================
+__pycache__/
+*.py[cod]
+*.sqlite3
+*.pyenv
+env/
+venv/
+ENV/
+env.bak/
+*.egg-info/
+*.log
+*.pot
+
+# Virtualenv
+*.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Python Environment
+.env
+.env.*
+
+# Database
+db.sqlite3
+
+# VSCode settings
+.vscode/
+
+# =================
+# OS generated files
+# =================
+Thumbs.db
+ehthumbs.db
+Desktop.ini
