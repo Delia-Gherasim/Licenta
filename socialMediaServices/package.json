@@ -1,0 +1,43 @@
+{
+  "name": "socialmediaservices",
+  "license": "0BSD",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web"
+  },
+  "dependencies": {
+    "@cloudinary/react": "^1.14.1",
+    "@cloudinary/url-gen": "^1.21.0",
+    "@expo/metro-runtime": "~4.0.1",
+    "@react-native-community/masked-view": "^0.1.11",
+    "@react-navigation/bottom-tabs": "^7.3.8",
+    "@react-navigation/material-top-tabs": "^7.2.8",
+    "@react-navigation/native": "^7.1.0",
+    "@react-navigation/stack": "^7.2.4",
+    "expo": "~52.0.42",
+    "expo-camera": "~16.0.18",
+    "expo-image-picker": "~16.0.6",
+    "expo-status-bar": "~2.0.1",
+    "firebase": "^11.6.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "react-native": "0.76.9",
+    "react-native-gesture-handler": "~2.20.2",
+    "react-native-screens": "~4.4.0",
+    "react-native-vector-icons": "^10.2.0",
+    "react-native-vision-camera": "^4.6.4",
+    "react-native-web": "~0.19.13",
+    "react-redux": "^9.2.0",
+    "react-webcam": "^7.2.0",
+    "redux": "^5.0.1",
+    "redux-thunk": "^3.1.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.20.0"
+  },
+  "private": true
+}
