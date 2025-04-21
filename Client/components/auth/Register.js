@@ -34,7 +34,8 @@ export class Register extends Component {
                 name,
                 email,
                 bio,
-                rating: 0,
+                postRating: 0,
+                commentsRating : 0,
                 followers: [],
                 following: []
             });

@@ -1,16 +1,15 @@
 import { getAuth } from "firebase/auth";
-import { addDoc, collection, doc, getFirestore, serverTimestamp, setDoc } from "firebase/firestore";
 import React, { useState } from "react";
 import { Alert, Button, Image, StyleSheet, TextInput, View } from "react-native";
-
-const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/df2iifqrf/image/upload";
-const UPLOAD_PRESET = "ml_default";
 
 export default function Post({ route }) {
   const { imageUri } = route.params;
   const [caption, setCaption] = useState("");
   const [uploading, setUploading] = useState(false);
 
+  const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/df2iifqrf/image/upload";
+  const UPLOAD_PRESET = "ml_default";
+  
   const uploadToCloudinary = async () => {
     const data = new FormData();
   
@@ -35,27 +34,36 @@ export default function Post({ route }) {
     }
   };
   
-
   const uploadPost = async () => {
+    setUploading(true);
+  
+    const user = getAuth().currentUser;
+    if (!user) throw new Error("User not authenticated");
+  
+    const uid = user.uid;
+  
     try {
-      setUploading(true);
-      const user = getAuth().currentUser;
-      if (!user) throw new Error("User not authenticated");
+      const url = await uploadToCloudinary(imageUri);
   
-      const uid = user.uid;
-      const firestore = getFirestore();
-  
-      const photoUrl = await uploadToCloudinary();
-  
-      const userDocRef = doc(firestore, "UserPosts", uid);
-      await setDoc(userDocRef, {}, { merge: true }); 
-
-      const postsCollectionRef = collection(firestore, "UserPosts", uid, "Posts");
-      await addDoc(postsCollectionRef, {
+      const payload = {
+        url,
+        uId: uid,
         caption,
-        date: serverTimestamp(),
-        photoUrl,
+        date: new Date().toISOString(),
+      };
+  
+      const response = await fetch("http://127.0.0.1:8000/data/posts/", {
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
       });
+  
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || "Failed to upload");
+      }
   
       Alert.alert("Success", "Post uploaded 🎉");
     } catch (error) {
