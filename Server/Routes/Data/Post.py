@@ -16,6 +16,13 @@ async def create_post(post_data: PostPydantic):
         return await post_service.add_post(post)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    
+@router.get("/")
+async def get_all_posts():
+    try:
+        return await post_service.get_all_posts()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @router.put("/{postId}")
 async def update_post(postId: str, post_data: PostPydantic):
@@ -31,14 +38,7 @@ async def update_post_view(postId: str):
         return await post_service.update_post_views(postId)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-    
-# @router.put("/rating/{postId}/{rating}")
-# async def update_post_rating(postId: str, rating: float):
-#     try:
-#         return await post_service.update_post_rating(postId, rating)
-#     except Exception as e:
-#         raise HTTPException(status_code=500, detail=str(e))
-    
+        
 @router.delete("/{postId}/{userId}")
 async def delete_post(userId: str, postId: str):
     try:
@@ -52,13 +52,22 @@ async def get_post_by_id(postId: str):
         return await post_service.get_post_by_id(postId)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
+    
+    
 @router.get("/all/{userId}")
 async def get_all_posts_of_user(userId: str):
     try:
         return await post_service.get_all_posts_of_user(userId)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    
+@router.get("/all_friends/{userId}")
+async def get_all_posts_for_user(userId: str):
+    try:
+        return await post_service.get_all_posts_for_user(userId)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
 
 @router.get("/user/{postId}")
 async def get_user_by_post(postId: str):

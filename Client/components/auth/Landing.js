@@ -2,23 +2,26 @@ import React from "react";
 import { View, Button, StyleSheet } from "react-native";
 
 export default function Landing({ navigation }) {
-  console.log("Landing Component Rendered");
-  console.log("Landing component props: ", { navigation });
-
   const handleRegisterPress = () => {
-    console.log("Register button pressed");
     navigation.navigate("Register");
   };
 
   const handleLogInPress = () => {
-    console.log("Log In button pressed");
-    navigation.navigate("Log In");
+    navigation.navigate("Login");
   };
 
   return (
     <View style={styles.container}>
-      <Button title="Register" onPress={handleRegisterPress} />
-      <Button title="Log In" onPress={handleLogInPress} />
+      <View style={styles.button}>
+        <Button
+          title="Register"
+          onPress={handleRegisterPress}
+          color="#6200ea"
+        />
+      </View>
+      <View style={styles.button}>
+        <Button title="Log In" onPress={handleLogInPress} color="#6200ea" />
+      </View>
     </View>
   );
 }
@@ -28,6 +31,11 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    backgroundColor: "#fff",
     padding: 20,
+  },
+  button: {
+    marginVertical: 10,
+    width: "80%",
   },
 });

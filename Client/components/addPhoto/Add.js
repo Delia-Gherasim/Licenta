@@ -9,7 +9,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import Webcam from "react-webcam";
+import Webcam from "react-webcam"; // For web webcam
 
 export default function Add() {
   const navigation = useNavigation();
@@ -18,15 +18,18 @@ export default function Add() {
   const [showCamera, setShowCamera] = useState(false);
   const cameraRef = useRef(null);
   const webcamRef = useRef(null);
-  const [CameraComponent, setCameraComponent] = useState(null);
-  const [devices, setDevices] = useState(null);
+  const [CameraComponent, setCameraComponent] = useState(null); // For mobile camera
+  const [devices, setDevices] = useState(null); // For mobile devices (if needed)
 
   useEffect(() => {
     getPermissionsAsync();
   }, []);
 
   const getPermissionsAsync = async () => {
+    // Request permissions for media library (for gallery access)
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    // Request camera permission for mobile devices if not on web
     let cameraStatus = "authorized";
     if (Platform.OS !== "web") {
       const { Camera } = await import("react-native-vision-camera");
@@ -65,10 +68,12 @@ export default function Add() {
     }
   };
 
+  // Permission loading state
   if (hasPermission === null) {
     return <Text>Requesting permissions...</Text>;
   }
 
+  // No access to camera/gallery
   if (hasPermission === false) {
     return <Text>No access to camera or gallery.</Text>;
   }
@@ -96,6 +101,7 @@ export default function Add() {
           ) : (
             <View style={styles.cameraWrapper}>
               <Text>Camera Loading...</Text>
+              {/* Mobile Camera Component (can use react-native-vision-camera) */}
             </View>
           )}
           <TouchableOpacity style={styles.captureButton} onPress={takePhoto} />
@@ -189,5 +195,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     borderRadius: 20,
     marginTop: 10,
+  },
+  webcam: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 10,
+  },
+  cameraWrapper: {
+    height: 400, // Adjust as per screen size
+    width: "100%",
+    backgroundColor: "#555", // Placeholder while camera is loading
   },
 });

@@ -1,11 +1,15 @@
 import os
 from dotenv import load_dotenv
+from fastapi.staticfiles import StaticFiles
 load_dotenv()
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from Routes.Ai import AiRoutes
+from Routes.Chatbot import Chatbot
 from Routes.Data import Comment, Post, User, Rating, Votes
+
+import tensorflow as tf
+print(tf.__version__)
 
 app = FastAPI()
 app.add_middleware(
@@ -15,7 +19,7 @@ app.add_middleware(
     allow_methods=["*"],  
     allow_headers=["*"],  
 )
-app.include_router(AiRoutes.router, prefix="/ai", tags=["AI"])
+app.include_router(Chatbot.router, prefix="/chatbot", tags=["Chatbot"])
 
 app.include_router(Post.router, prefix="/data/posts", tags=["Posts"])
 app.include_router(Comment.router, prefix="/data/comments", tags=["Comments"])

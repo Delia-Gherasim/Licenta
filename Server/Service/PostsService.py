@@ -41,6 +41,47 @@ class PostsService:
             return {"error": "Invalid user ID"}
         return await self.retry(self.repo.get_user_posts_from_firestore, user_id)
     
+    async def get_all_posts_for_user(self, user_id: str):
+        if not await self._validate_user(user_id):
+            return {"error": "Invalid user ID"}
+
+        # Fetch user data
+        user_data = await self.retry(self.user_repo.get_user_by_id, user_id)
+        if not user_data or "error" in user_data:
+            return {"error": "User data not found"}
+
+        # Collect user IDs: mutuals, only-following, and only-followers
+        following = set(user_data.get("following", []))
+        followers = set(user_data.get("followers", []))
+        mutuals = following & followers
+        only_following = following - mutuals
+        only_followers = followers - mutuals
+
+        # Combine all user IDs to check for posts from
+        all_user_ids = list(mutuals) + list(only_following) + list(only_followers)
+
+        posts_by_priority = []
+
+        # Fetch posts for each user in all_user_ids
+        tasks = [
+            self.retry(self.repo.get_user_posts_from_firestore, uid)
+            for uid in all_user_ids
+        ]
+        results = await asyncio.gather(*tasks)
+
+        for uid, posts in zip(all_user_ids, results):
+            if posts and isinstance(posts, dict):
+                posts_list = posts.get('posts', [])
+                if posts_list:
+                    for p in posts_list:
+                        posts_by_priority.append(p)
+                
+        return {"posts" : posts_by_priority}
+
+    async def get_all_posts(self):
+        result = await self.retry(self.repo.get_all_posts_from_firestore)
+        return result
+    
     async def get_user_by_post(self, post_id: str):
         if not post_id:
             return {"error": "Post ID is required"}
@@ -76,7 +117,6 @@ class PostsService:
         if not await self._validate_post(post_id):
             return {"error": "Invalid post ID"}
 
-        print("in service")
         post_data = await self.repo.get_single_post(post_id)
         
         try:
@@ -95,9 +135,7 @@ class PostsService:
         elif not isinstance(newRating, float):
             logger.error(f"Unexpected type for newRating: {type(newRating)}")
             return {"error": "Invalid rating data"}
-
-        print(f"newRating: {newRating} (type: {type(newRating)})")
-        
+       
         try:
             await self.repo.update_post_rating(post_id, newRating)
         except Exception as e:
@@ -108,14 +146,12 @@ class PostsService:
             newUserRating = await self.repo.get_user_average_rating(post_data.get('userId'))
             if isinstance(newUserRating, dict) and 'averageRating' in newUserRating:
                 newUserRating = newUserRating['averageRating']
-            
-            print(f"newUserRating: {newUserRating} (type: {type(newUserRating)})")
+
             await self.user_repo.update_user_rating(post_data.get('userId'), newUserRating)
         except Exception as e:
             logger.error(f"Error updating user rating for user {post_data.get('userId')}: {e}")
             return {"error": f"Error updating user rating: {str(e)}"}
 
-        print("dupa call repo")
         return {"message": "Post rating updated"}
 
     async def delete_post(self, user_id: str, post_id: str):

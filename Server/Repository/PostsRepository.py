@@ -38,28 +38,17 @@ class PostsRepository:
 
         return {"message": "Post uploaded", "postId": post.id, "url": post.url}
 
-    async def get_user_posts_from_firestore(self, user_id: str, page_size: int = 10, last_post_id: str = None):
+    async def get_user_posts_from_firestore(self, user_id: str):
         try:
             posts_query = self.posts_collection \
                 .where("userId", "==", user_id) \
-                .order_by("date", direction="DESCENDING") \
-                .limit(page_size)
-
-            if last_post_id:
-                last_doc_ref = self.posts_collection.document(last_post_id)
-                last_doc_snapshot = await self._fetch_document(self.posts_collection, last_post_id)
-                if last_doc_snapshot.exists:
-                    posts_query = posts_query.start_after(last_doc_snapshot)
-                else:
-                    return {"error": "Invalid last_post_id"}
+                .order_by("date", direction="DESCENDING")  
 
             posts = await asyncio.to_thread(lambda: list(posts_query.stream()))
             post_list = [{**p.to_dict(), "postId": p.id} for p in posts]
-            last_visible_id = posts[-1].id if posts else None
 
             return {
-                "posts": post_list,
-                "lastVisibleId": last_visible_id
+                "posts": post_list
             }
 
         except InvalidArgument as e:
@@ -67,6 +56,20 @@ class PostsRepository:
             return {
                 "error": "Firestore index is missing. Please create the required composite index."
             }
+     
+    async def get_all_posts_from_firestore(self):
+        try:
+            posts_query = self.posts_collection \
+                .order_by("rating", direction="DESCENDING") \
+                .order_by("date", direction="DESCENDING")
+            
+            posts = await asyncio.to_thread(lambda: list(posts_query.stream()))
+
+            post_list = [{**p.to_dict(), "postId": p.id} for p in posts]
+            return {"posts": post_list}
+        except InvalidArgument as e:
+            logger.error(f"Firestore query failed: {e}")
+            return {"error": "Firestore index is missing. Please create the required composite index."}
 
     async def get_single_post(self, postId: str):
         post = await self._fetch_document(self.posts_collection, postId)

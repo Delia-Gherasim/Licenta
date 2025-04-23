@@ -68,7 +68,6 @@ class UsersRepository:
         return await self._update_followers_or_following(uId, "followers", followerUserId, status)
 
     async def update_user_rating(self, uId: str, new_rating: float):
-        print("in call repo")
         user_doc = await self._get_user_doc(uId)
         if user_doc.exists:
             await run_in_threadpool(user_doc.reference.update, {"postRating": new_rating})
