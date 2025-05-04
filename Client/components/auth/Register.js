@@ -5,11 +5,9 @@ import {
   TextInput,
   View,
   StyleSheet,
-  ScrollView,
+  ScrollView, 
 } from "react-native";
-import { createUserWithEmailAndPassword, getAuth } from "firebase/auth";
-import { doc, getFirestore, setDoc } from "firebase/firestore";
-
+import AuthObserver from "../../utils/AuthObserver";
 export class Register extends Component {
   constructor(props) {
     super(props);
@@ -25,39 +23,32 @@ export class Register extends Component {
 
   async onSignUp() {
     const { email, password, RePassword, name, bio } = this.state;
-    const auth = getAuth();
-    const db = getFirestore();
-
-    if (password !== RePassword) {
-      Alert.alert("Error", "Passwords do not match.");
+  
+    if (!email.includes("@")) {
+      Alert.alert("Invalid Email", "Please enter a valid email address.");
       return;
     }
-
+  
+    if (password.length < 6) {
+      Alert.alert("Weak Password", "Password must be at least 6 characters.");
+      return;
+    }
+  
+    if (password !== RePassword) {
+      Alert.alert("Password Mismatch", "Passwords do not match.");
+      return;
+    }
+  
     try {
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
-      const user = userCredential.user;
-
-      await setDoc(doc(db, "users", user.uid), {
-        name,
-        email,
-        bio,
-        postRating: 0,
-        commentsRating: 0,
-        followers: [],
-        following: [],
-      });
-
+      await AuthObserver.register({ email, password, name, bio });
       Alert.alert("Success", "User registered successfully!");
-      // Optionally navigate to login or home screen here
     } catch (error) {
-      console.error("Error signing up:", error);
-      Alert.alert("Sign Up Error", error.message);
+      console.error("Registration error:", error);
+      Alert.alert("Registration Failed", error.message);
     }
   }
+  
+  
 
   render() {
     return (

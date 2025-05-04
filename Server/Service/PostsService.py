@@ -168,6 +168,9 @@ class PostsService:
         ]
         
         await asyncio.gather(*tasks)
+        remaining_posts = await self.repo.get_user_posts_from_firestore(user_id)
+        if not remaining_posts.get('posts'):  
+            await self.user_repo.update_user_rating(user_id, 0)
         newUserRating = await self.repo.get_user_average_rating(post_data.get('userId'))
         await self.user_repo.update_user_rating(post_data.get('userId'), newUserRating)
 

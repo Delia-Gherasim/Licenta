@@ -13,12 +13,11 @@ class SceneClassifier(BaseModel):
         super().__init__()
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-        # Load the Places365 model
         self.model = models.resnet18(num_classes=365)
         model_file = 'resnet18_places365.pth.tar'
 
         if not os.path.exists(model_file):
-            print("Downloading model weights...")
+            print("Downloading model weights...*")
             url = 'http://places2.csail.mit.edu/models_places365/resnet18_places365.pth.tar'
             r = requests.get(url, allow_redirects=True)
             with open(model_file, 'wb') as f:
@@ -27,13 +26,12 @@ class SceneClassifier(BaseModel):
         checkpoint = torch.load(model_file, map_location=self.device)
         new_state_dict = OrderedDict()
         for k, v in checkpoint['state_dict'].items():
-            new_key = k.replace('module.', '')  # remove 'module.' prefix
+            new_key = k.replace('module.', '')  
             new_state_dict[new_key] = v
 
         self.model.load_state_dict(new_state_dict)
         self.model.eval().to(self.device)
 
-        # Load category names
         self.classes = []
         categories_file = 'categories_places365.txt'
         if not os.path.exists(categories_file):
@@ -46,7 +44,6 @@ class SceneClassifier(BaseModel):
         with open(categories_file) as class_file:
             self.classes = [line.strip().split(' ')[0][3:] for line in class_file]
 
-        # Image preprocessing
         self.transform = transforms.Compose([
             transforms.Resize((256, 256)),
             transforms.CenterCrop(224),

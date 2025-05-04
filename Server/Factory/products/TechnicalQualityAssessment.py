@@ -44,12 +44,6 @@ class TechnicalQualityAssessment(BaseModel):
         mean_brightness = np.mean(gray)
         
         return mean_brightness
-        if mean_brightness < 85:
-            return "underexposed"
-        elif mean_brightness > 170:
-            return "overexposed"
-        else:
-            return "normal"
     
     def _get_noise_score(self, img_np):
         gray = cv2.cvtColor(img_np, cv2.COLOR_RGB2GRAY)
@@ -57,11 +51,4 @@ class TechnicalQualityAssessment(BaseModel):
         variance = laplacian.var()
         
         return variance
-        if variance < 50:
-            return "high"  
-        elif variance < 100:
-            return "medium"
-        else:
-            return "low"
-    
     

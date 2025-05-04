@@ -8,6 +8,7 @@ import {
   ScrollView,
 } from "react-native";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import AuthObserver from "../../utils/AuthObserver";
 
 export class Login extends Component {
   constructor(props) {
@@ -23,16 +24,13 @@ export class Login extends Component {
     const { email, password } = this.state;
     const auth = getAuth();
 
-    signInWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-        console.log("User signed in:", userCredential.user);
-        Alert.alert("Success", "Signed in successfully!");
-        // Optionally: this.props.navigation.navigate('Main');
-      })
-      .catch((error) => {
-        console.error("Error signing in:", error);
-        Alert.alert("Login Error", error.message);
-      });
+    AuthObserver.login(email, password)
+    .then((userCredential) => {
+      Alert.alert("Success", "Signed in successfully!");
+    })
+    .catch((error) => {
+      Alert.alert("Login Error", error.message);
+    });
   }
 
   render() {

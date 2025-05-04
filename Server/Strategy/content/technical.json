@@ -1,0 +1,58 @@
+{
+    "exposure": {
+      "title": "What is Exposure in Photography?",
+      "description": "Exposure is the amount of light that reaches the camera sensor or film. It affects how light or dark an image appears. Exposure is controlled by the aperture, shutter speed, and ISO settings — collectively known as the exposure triangle.",
+      "components": {
+        "shutter_speed": {
+          "description": "Controls how long the camera’s shutter stays open.",
+          "details": "Shutter speed influences brightness and motion capture. Fast speeds freeze action; slow speeds create motion blur or allow more light.",
+          "range": "1/8000s to 30s or more"
+        },
+        "aperture": {
+          "description": "The size of the lens opening through which light enters.",
+          "details": "Measured in f-stops (e.g., f/1.4). A lower number means a wider opening, more light, and shallower depth of field. A higher number gives deeper focus and less light.",
+          "examples": ["f/1.4", "f/2.8", "f/16"]
+        },
+        "iso": {
+          "description": "The sensitivity of the camera's sensor to light.",
+          "details": "Low ISO (e.g., 100) is best for bright light and reduces noise. High ISO (e.g., 1600+) helps in low light but increases noise.",
+          "image_link": "https://images.squarespace-cdn.com/content/v1/5013f4b2c4aaa4752ac69b17/d054f074-82e4-46e8-86e5-c52301c1eb37/WHAT+IS+ISO+IN+PHOTOGRAPHY-4.jpg?format=2500w"
+        }
+      },
+      "importance": "Balancing these three settings is essential for achieving a properly exposed image. Overexposure loses highlight detail, underexposure loses shadow detail."
+    },
+    "focusing": {
+      "title": "The Basics of Camera Focusing",
+      "description": "Focusing adjusts the lens so that the desired subject appears sharp. Achieving accurate focus directs viewer attention and ensures clarity.",
+      "concepts": {
+        "plane_of_focus": {
+          "description": "An imaginary line or plane where all objects are in perfect focus.",
+          "details": "When subjects align with this plane, they appear sharp. Aperture controls the width of this plane."
+        },
+        "depth_of_field": {
+          "description": "The range of distance in a photo that appears acceptably sharp.",
+          "factors": {
+            "aperture": "Smaller apertures (high f-stop) increase depth of field.",
+            "subject_distance": "Closer subjects result in a shallower depth of field.",
+            "focal_length": "Longer lenses reduce depth of field."
+          }
+        }
+      },
+      "challenges_and_solutions": {
+        "low_light": [
+          "Use lenses with wider maximum apertures",
+          "Increase ISO (accepting more noise)",
+          "Use built-in focus assist light",
+          "Switch to manual focus if autofocus fails",
+          "Use a lit object to focus, then switch to manual"
+        ],
+        "fast_moving_subjects": [
+          "Use continuous autofocus (AF-C or AI-Servo)",
+          "Increase autofocus sensitivity",
+          "Pan with the subject",
+          "Pre-focus on a spot the subject will pass through"
+        ]
+      }
+    }
+  }
+  

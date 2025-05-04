@@ -1,10 +1,10 @@
-from typing import List
+from typing import List, Optional
 from pydantic import BaseModel, Field, HttpUrl, validator
 from Model.Post import Post
 
 class PostPydantic(BaseModel):
     user_id: str
-    caption: str = Field(..., min_length=1)
+    caption: Optional[str] = ""
     date: str  
     rating: float
     url: HttpUrl

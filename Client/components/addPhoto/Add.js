@@ -1,6 +1,6 @@
 import { useNavigation } from "@react-navigation/native";
 import * as ImagePicker from "expo-image-picker";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Image,
   Platform,
@@ -9,34 +9,21 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import Webcam from "react-webcam"; // For web webcam
+import MobileCamera from "./MobileCamera"; // Mobile camera component
+import WebCamera from "./WebCamera"; // Web camera component
+import { Ionicons } from "@expo/vector-icons";
 
 export default function Add() {
   const navigation = useNavigation();
   const [imageUri, setImageUri] = useState(null);
   const [hasPermission, setHasPermission] = useState(null);
-  const [showCamera, setShowCamera] = useState(false);
-  const cameraRef = useRef(null);
-  const webcamRef = useRef(null);
-  const [CameraComponent, setCameraComponent] = useState(null); // For mobile camera
-  const [devices, setDevices] = useState(null); // For mobile devices (if needed)
 
   useEffect(() => {
-    getPermissionsAsync();
+    (async () => {
+      const { status: camStatus } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      setHasPermission(camStatus === "granted");
+    })();
   }, []);
-
-  const getPermissionsAsync = async () => {
-    // Request permissions for media library (for gallery access)
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-
-    // Request camera permission for mobile devices if not on web
-    let cameraStatus = "authorized";
-    if (Platform.OS !== "web") {
-      const { Camera } = await import("react-native-vision-camera");
-      cameraStatus = await Camera.requestCameraPermission();
-    }
-    setHasPermission(status === "granted" && cameraStatus === "authorized");
-  };
 
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -51,71 +38,43 @@ export default function Add() {
     }
   };
 
-  const takePhoto = async () => {
-    if (Platform.OS === "web") {
-      const capturedImage = webcamRef.current.getScreenshot();
-      setImageUri(capturedImage);
-      setShowCamera(false);
-    } else {
-      if (cameraRef.current) {
-        cameraRef.current
-          .takeSnapshot({ quality: 85, format: "jpeg" })
-          .then((photo) => {
-            setImageUri(photo.path);
-            setShowCamera(false);
-          });
-      }
-    }
-  };
-
-  // Permission loading state
   if (hasPermission === null) {
-    return <Text>Requesting permissions...</Text>;
+    return <Text style={styles.statusText}>Requesting permissions...</Text>;
   }
 
-  // No access to camera/gallery
   if (hasPermission === false) {
-    return <Text>No access to camera or gallery.</Text>;
+    return <Text style={styles.statusText}>No access to camera or gallery.</Text>;
   }
 
   return (
     <View style={styles.container}>
-      {!showCamera && (
-        <View style={styles.topButtons}>
-          <TouchableOpacity style={styles.smallButton} onPress={pickImage}>
-            <Text style={styles.buttonText}>Gallery</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.smallButton}
-            onPress={() => setShowCamera(true)}
-          >
-            <Text style={styles.buttonText}>Camera</Text>
-          </TouchableOpacity>
-        </View>
-      )}
-
-      {showCamera && (
-        <View>
+      {!imageUri && (
+        <View style={styles.cameraContainer}>
           {Platform.OS === "web" ? (
-            <Webcam audio={false} ref={webcamRef} style={styles.webcam} />
+            <WebCamera setImageUri={setImageUri} />
           ) : (
-            <View style={styles.cameraWrapper}>
-              <Text>Camera Loading...</Text>
-              {/* Mobile Camera Component (can use react-native-vision-camera) */}
-            </View>
+            <MobileCamera setImageUri={setImageUri} />
           )}
-          <TouchableOpacity style={styles.captureButton} onPress={takePhoto} />
+
+          <View style={styles.cameraControls}>
+            <TouchableOpacity
+              onPress={pickImage}
+              style={[styles.iconButton, styles.folderButton]}
+            >
+              <Ionicons name="folder-open" size={32} color="white" />
+            </TouchableOpacity>
+          </View>
         </View>
       )}
 
-      {imageUri && !showCamera && (
+      {imageUri && (
         <View style={styles.imageContainer}>
           <Image source={{ uri: imageUri }} style={styles.image} />
           <Text style={styles.imageText}>Image Selected!</Text>
 
           <TouchableOpacity
             style={styles.actionButton}
-            onPress={() => navigation.navigate("Post", { imageUri })}
+            onPress={() => navigation.navigate("Publish", { imageUri })}
           >
             <Text style={styles.buttonText}>Post</Text>
           </TouchableOpacity>
@@ -125,6 +84,13 @@ export default function Add() {
             onPress={() => navigation.navigate("Analyze", { imageUri })}
           >
             <Text style={styles.buttonText}>Analyze</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.actionButton, { backgroundColor: "#ff6347" }]}
+            onPress={() => setImageUri(null)}
+          >
+            <Text style={styles.buttonText}>Choose Another</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -139,49 +105,36 @@ const styles = StyleSheet.create({
     paddingTop: 50,
     backgroundColor: "#222",
   },
-  topButtons: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+  cameraContainer: {
     width: "80%",
-    position: "absolute",
-    top: 20,
-  },
-  smallButton: {
-    backgroundColor: "#007AFF",
-    paddingVertical: 8,
-    paddingHorizontal: 15,
-    borderRadius: 20,
-    marginHorizontal: 10,
-  },
-  captureButton: {
-    position: "absolute",
-    bottom: 30, // Positioned at the bottom
-    alignSelf: "center", // Centers it horizontally
-    width: 80, // Bigger button
-    height: 80,
-    borderRadius: 40, // Circular shape
-    backgroundColor: "#fff", // White button for visibility
+    height: "80%", // Occupy 80% of the screen height
     justifyContent: "center",
     alignItems: "center",
-    borderWidth: 4,
-    borderColor: "#000", // Black border for contrast
-    shadowColor: "#000",
-    shadowOpacity: 0.3,
-    shadowRadius: 5,
-    elevation: 5, // Shadow effect for Android
+    position: "relative",
   },
-  buttonText: {
-    color: "#fff",
-    fontSize: 14,
-    fontWeight: "bold",
+  cameraControls: {
+    position: "absolute",
+    bottom: 20,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    width: "100%",
   },
+  iconButton: {
+    padding: 10,
+  },
+  folderButton: {
+    position: "absolute",
+    left: 700,
+    top: 12, // 375px webcam + 20px spacing,
+  },  
   imageContainer: {
     marginTop: 20,
     alignItems: "center",
   },
   image: {
-    width: 200,
-    height: 200,
+    width: "50%",
+    height: "50%",
     borderRadius: 10,
   },
   imageText: {
@@ -191,19 +144,14 @@ const styles = StyleSheet.create({
   },
   actionButton: {
     backgroundColor: "#28a745",
-    paddingVertical: 8,
-    paddingHorizontal: 20,
+    paddingVertical: 10,
+    paddingHorizontal: 30,
     borderRadius: 20,
     marginTop: 10,
   },
-  webcam: {
-    width: "100%",
-    height: "100%",
-    borderRadius: 10,
-  },
-  cameraWrapper: {
-    height: 400, // Adjust as per screen size
-    width: "100%",
-    backgroundColor: "#555", // Placeholder while camera is loading
+  buttonText: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "bold",
   },
 });

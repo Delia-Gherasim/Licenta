@@ -1,21 +1,17 @@
-import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
 import React, { Component } from "react";
-import { connect } from "react-redux";
-import { bindActionCreators } from "redux";
-import { fetchUser } from "../redux/actions";
+import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
 import AddStack from "./addPhoto/AddStack";
 import Feed from "./Feed/Feed";
-import Profile from "./main/Profile";
+import ProfileStack from "./profile/ProfileStack";
 import { MaterialCommunityIcons } from "react-native-vector-icons";
+import AnotherProfile from "./profile/AnotherProfile";
 
 const Tab = createMaterialTopTabNavigator();
 
-export class Main extends Component {
-  componentDidMount() {
-    this.props.fetchUser();
-  }
-
+export default class Main extends Component {
+  
   render() {
+    console.log("MAIN"); 
     return (
       <Tab.Navigator
         screenOptions={{
@@ -24,6 +20,7 @@ export class Main extends Component {
           tabBarIndicatorStyle: { backgroundColor: "white" },
         }}
       >
+        
         <Tab.Screen
           name="Feed"
           component={Feed}
@@ -48,7 +45,7 @@ export class Main extends Component {
         />
         <Tab.Screen
           name="Profile"
-          component={Profile}
+          component={ProfileStack}
           options={{
             tabBarLabel: ({ color }) => (
               <MaterialCommunityIcons
@@ -59,16 +56,8 @@ export class Main extends Component {
             ),
           }}
         />
+       
       </Tab.Navigator>
     );
   }
 }
-
-const mapStateToProps = (store) => ({
-  currentUser: store.userState.currentUser,
-});
-
-const mapDispatchProps = (dispatch) =>
-  bindActionCreators({ fetchUser }, dispatch);
-
-export default connect(mapStateToProps, mapDispatchProps)(Main);

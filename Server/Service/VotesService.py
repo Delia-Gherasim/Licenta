@@ -84,7 +84,6 @@ class VotesService:
             raise ValueError("Invalid user ID")
 
         logger.info(f"User {user_id} voting on comment {comment_id} with vote: {vote}")
-        # Vote operation
         await self.retry(self.votes_repo.upload_or_update_vote, comment_id, user_id, vote)
 
         # Get the total votes for the comment and update the comment and user ratings concurrently

@@ -1,0 +1,84 @@
+{
+    "Natural Landscapes": [
+      "badlands", "canyon", "cliff", "desert/sand", "desert/vegetation", "desert_road",
+      "mountain", "mountain_path", "mountain_snowy", "tundra", "snowfield", "valley",
+      "glacier", "iceberg", "ice_floe", "ice_shelf", "volcano", "swamp", "watering_hole",
+      "lake/natural", "pond", "river", "lagoon", "creek", "waterfall", "coast", "beach", "ocean", "sky"
+    ],
+    "Urban & City Scenes": [
+      "apartment_building/outdoor", "downtown", "street", "alley", "crosswalk", "plaza",
+      "building_facade", "skyscraper", "residential_neighborhood"
+    ],
+    "Indoor Domestic Spaces": [
+      "bedroom", "bathroom", "kitchen", "living_room", "attic", "closet", "pantry", "nursery",
+      "home_office", "television_room", "home_theater", "playroom", "laundromat"
+    ],
+    "Public Interior Spaces": [
+      "office", "office_cubicles", "conference_room", "conference_center", "lobby",
+      "waiting_room", "shopping_mall/indoor", "hospital", "hospital_room",
+      "classroom", "lecture_room", "library/indoor", "museum/indoor", "science_museum",
+      "legislative_chamber", "courtroom", "server_room", "clean_room"
+    ],
+    "Gardens, Parks & Green Spaces": [
+      "formal_garden", "botanical_garden", "topiary_garden", "zen_garden",
+      "greenhouse/outdoor", "greenhouse/indoor", "park", "playground", "picnic_area", "lawn"
+    ],
+    "Shops & Markets": [
+      "supermarket", "bookstore", "candy_store", "clothing_store", "gift_shop", "toyshop",
+      "florist_shop/indoor", "general_store/indoor", "general_store/outdoor", "bazaar/indoor",
+      "bazaar/outdoor", "market/indoor", "market/outdoor", "shopfront", "shoe_shop", "pharmacy"
+    ],
+    "Food & Dining Establishments": [
+      "restaurant", "restaurant_kitchen", "restaurant_patio", "fastfood_restaurant", "cafeteria",
+      "dining_hall", "dining_room", "bar", "pub/indoor", "beer_garden", "beer_hall", "pizzeria",
+      "sushi_bar", "diner/outdoor", "coffee_shop", "ice_cream_parlor"
+    ],
+    "Hospitality & Lodging": [
+      "hotel/outdoor", "hotel_room", "motel", "inn/outdoor", "youth_hostel", "bedchamber",
+      "apartment_building/outdoor", "chalet", "cottage", "hunting_lodge/outdoor", "mansion"
+    ],
+    "Transportation & Travel": [
+      "airport_terminal", "airplane_cabin", "cockpit", "car_interior", "bus_interior",
+      "train_interior", "train_station/platform", "subway_station/platform", "runway",
+      "railroad_track", "highway", "landing_deck", "gas_station", "heliport", "hangar/indoor",
+      "hangar/outdoor"
+    ],
+    "Education & Cultural Institutions": [
+      "schoolhouse", "classroom", "kindergarden_classroom", "art_school",
+      "museum/indoor", "museum/outdoor", "natural_history_museum", "art_gallery",
+      "music_studio", "science_museum", "theater", "stage/indoor", "stage/outdoor"
+    ],
+    "Scientific & Industrial": [
+      "biology_laboratory", "chemistry_lab", "physics_laboratory", "clean_room",
+      "assembly_line", "auto_factory", "engine_room", "utility_room", "repair_shop", "factory"
+    ],
+    "Sports & Recreation": [
+      "gymnasium/indoor", "martial_arts_gym", "recreation_room", "swimming_pool/indoor",
+      "swimming_pool/outdoor", "water_park", "swimming_hole", "football_field",
+      "soccer_field", "basketball_court/indoor", "volleyball_court/outdoor",
+      "stadium/football", "stadium/baseball", "stadium/soccer", "boxing_ring"
+    ],
+    "Historical & Sacred Sites": [
+      "archaeological_excavation", "ruin", "catacomb", "mausoleum", "temple/asia", "pagoda",
+      "palace", "throne_room", "mosque/outdoor", "church/indoor", "church/outdoor", "synagogue/outdoor"
+    ],
+    "Workshops & Functional Spaces": [
+      "garage/indoor", "garage/outdoor", "shed", "butchers_shop", "hardware_store",
+      "fire_station", "storage_room", "utility_room", "construction_site", "loading_dock", "television_studio"
+    ],
+    "Agricultural & Rural": [
+      "farm", "barn", "pasture", "orchard", "vineyard", "rice_paddy", "corn_field",
+      "tree_farm", "vegetable_garden", "hayfield", "field/cultivated", "field/wild"
+    ],
+    "Entertainment & Leisure": [
+      "amusement_park", "carrousel", "discotheque", "ballroom", "bowling_alley",
+      "amusement_arcade", "ball_pit", "theater", "stage/indoor", "stage/outdoor"
+    ],
+    "Relaxation & Wellness": [
+      "sauna", "jacuzzi/indoor", "spa", "hot_spring", "beauty_salon", "wet_bar"
+    ],
+    "Security & Institutions": [
+      "jail_cell", "courthouse", "army_base", "embassy", "legislative_chamber", "dorm_room"
+    ]
+  }
+  

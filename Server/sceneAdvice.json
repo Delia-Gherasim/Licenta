@@ -1,0 +1,35 @@
+{
+    "category_advice": {
+      "Natural Landscapes": "Use a wide-angle lens to emphasize scale, shoot during golden hour for dramatic lighting, and include foreground elements for depth.",
+      "Urban & City Scenes": "Capture geometric patterns and reflections, look for symmetry or leading lines, and shoot at night for vibrant city lights.",
+      "Indoor Domestic Spaces": "Use natural window light, declutter the space for clean composition, and use a tripod in low-light settings.",
+      "Public Interior Spaces": "Highlight architectural elements and symmetry, use leading lines, and consider HDR to handle indoor lighting contrast.",
+      "Gardens, Parks & Green Spaces": "Frame with flowers or trees for natural borders, use macro for details, and take advantage of soft morning or evening light.",
+      "Shops & Markets": "Photograph colorful displays or human interactions, use shallow depth of field to isolate subjects, and capture candid street-style moments.",
+      "Food & Dining Establishments": "Use side lighting to highlight texture, style the scene with complementary props, and shoot overhead or at a 45-degree angle.",
+      "Hospitality & Lodging": "Emphasize comfort and ambiance, use a wide lens for room shots, and highlight amenities or scenic views.",
+      "Transportation & Travel": "Capture motion blur to show movement, use symmetry in station platforms or roadways, and document the journey as a visual story.",
+      "Education & Cultural Institutions": "Focus on storytelling by capturing emotion or activity, use natural light where possible, and show both detail and scale.",
+      "Scientific & Industrial": "Highlight repetition and machinery structure, use high-contrast lighting to define shapes, and emphasize human interaction with technology when relevant.",
+      "Sports & Recreation": "Freeze fast action with high shutter speed, capture facial expressions and dynamic poses, and consider wide shots to show context.",
+      "Historical & Sacred Sites": "Respect the space, use symmetry, focus on fine details and architecture, and avoid flash in sensitive locations.",
+      "Workshops & Functional Spaces": "Document work-in-progress with natural light, show tool textures and manual processes, and use wide shots to establish environment.",
+      "Agricultural & Rural": "Capture golden hour or blue hour lighting, show patterns in crops or terrain, and tell stories of rural life through candid portraits.",
+      "Entertainment & Leisure": "Freeze motion or use slow shutter for light trails, focus on expressions and joy, and shoot at dusk for vibrant ambient light.",
+      "Relaxation & Wellness": "Use soft, diffused light to convey calmness, emphasize minimalist compositions, and consider pastel or muted tones for mood.",
+      "Security & Institutions": "Emphasize formality and symmetry, use balanced compositions, and adjust white balance to match indoor lighting tones."
+    },
+    "scene_advice": {
+      "beach": "Use a polarizing filter to manage reflections and deepen the sky color. Capture both wide shots and close-ups of textures like sand or seashells.",
+      "street": "Look for moments of interaction or emotion, use natural light creatively, and try black and white for mood or grit.",
+      "kitchen": "Shoot with side lighting to enhance textures of food or appliances. Keep the background clean and use shallow depth of field to focus on action.",
+      "library/indoor": "Respect quiet environments with no flash, focus on repeating patterns like bookshelves, and capture reading moments or quiet study.",
+      "restaurant": "Capture ambiance with shallow depth of field. Highlight textures in food and use available light sources for atmosphere.",
+      "train_station/platform": "Use leading lines to emphasize perspective, include human subjects for storytelling, and try long exposures to show motion.",
+      "mountain": "Frame the mountain with foreground elements like trees or rocks for depth, and aim for sunrise or sunset for dramatic light and shadows.",
+      "museum/indoor": "Use symmetry and ambient lighting to highlight exhibits. Avoid reflections by shooting slightly off-angle to glass.",
+      "supermarket": "Capture vivid colors and organized chaos. Shoot candid moments of people shopping for documentary-style results.",
+      "bedroom": "Use soft, natural light from windows. Keep compositions tidy and highlight cozy or personal elements in the space."
+    }
+  }
+  

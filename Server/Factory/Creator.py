@@ -13,7 +13,7 @@ class Creator:
         model_map = {
             "aesthetic": AestheticIQA(),
             "composition": CompositionIQA(),
-            "chromatic": ChromaticIQA(),  # Assuming chromatic uses the same model as composition
+            "chromatic": ChromaticIQA(),  
             "quality": TechnicalQualityAssessment(),
             "object": ObjectRecognition(),
             "scene": SceneClassifier(),

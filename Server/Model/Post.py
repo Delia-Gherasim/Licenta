@@ -3,10 +3,7 @@ class Post:
         self._id = id
         self._userId = userId
 
-        if not isinstance(caption, str) or len(caption) == 0:
-            raise ValueError("Caption must be a non-empty string")
         self._caption = caption
-
         if not isinstance(date, str):
             raise ValueError("Date must be a string in the format 'YYYY-MM-DD'")
         self._date = date

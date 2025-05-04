@@ -5,14 +5,13 @@ from collections import Counter
 
 from Factory.products.BaseModel import BaseModel
 
-
 class ChromaticIQA(BaseModel):
     def predict(self, image: Image.Image):
         img_np = np.array(image.convert("RGB"))
         color_data = self._analyze_colors(img_np)
 
         return {
-            "contrast": {k: float(v) for k,v in color_data["contrast"].items()},
+            "contrast": float(color_data["contrast"]),
             "color_harmony": color_data["harmony"],
             "color_percentages": {
                 k: float(v) for k, v in color_data["percentages"].items()
@@ -44,12 +43,11 @@ class ChromaticIQA(BaseModel):
                 mean_hue = np.mean(hues[mask])
                 dominant_hues.append(mean_hue)
 
-        # Calculate hue distances
         hue_diffs = []
         for i in range(len(dominant_hues)):
             for j in range(i + 1, len(dominant_hues)):
                 diff = abs(dominant_hues[i] - dominant_hues[j])
-                diff = min(diff, 180 - abs(180 - diff))  # circular hue space
+                diff = min(diff, 180 - abs(180 - diff)) 
                 hue_diffs.append(diff)
 
         avg_diff = np.mean(hue_diffs) if hue_diffs else 0

@@ -28,12 +28,12 @@ class ObjectRecognition(BaseModel):
             outputs = self.model(img_tensor)
 
         probabilities = torch.nn.functional.softmax(outputs[0], dim=0)
-        top5_prob, top5_catid = torch.topk(probabilities, 5)
+        top_prob, top_catid = torch.topk(probabilities, 1)
 
         results = []
-        for i in range(top5_prob.size(0)):
-            label = self.labels[str(top5_catid[i].item())][1]
-            confidence = top5_prob[i].item() * 100 
-            results.append({"label": label, "confidence": round(confidence, 2)})
+        label = self.labels[str(top_catid.item())][1]
+        number = top_catid.item()
+        confidence = top_prob.item() * 100 
+        results.append({"label": label, "number":number, "confidence": round(confidence, 2)})
 
         return results
