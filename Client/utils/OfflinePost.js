@@ -4,7 +4,7 @@ import NetInfo from "@react-native-community/netinfo";
 import { uploadToCloudinary } from "./CloudinaryConfig";
 import { emitPostAdded } from "./PostEvent";
 import Constants from 'expo-constants';
-const API_URL = Constants.manifest.extra.API_URL_DATA;
+const API_URL = Constants.expoConfig.extra.API_URL_DATA;
 const useOfflinePostSync = () => {
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener(async (state) => {

@@ -10,8 +10,6 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { uploadToCloudinary } from "../../utils/CloudinaryConfig";
-import * as FileSystem from "expo-file-system";
-import * as mime from 'mime-types';
 import { Dimensions } from "react-native";
 import TextResponse from "./TextResponse";
 import Constants from 'expo-constants';
@@ -29,7 +27,7 @@ export default function Analyze({ route }) {
   const [showCameraAnimation, setShowCameraAnimation] = useState(false);
   const scrollViewRef = useRef();
 
-  const API_URL = Constants.manifest.extra.API_URL_CHATBOT;
+  const API_URL = Constants.expoConfig.extra.API_URL_CHATBOT;
   const optionLabels = {
     aesthetic_score: "Aesthetic Score",
     technical_quality: "Technical Quality",

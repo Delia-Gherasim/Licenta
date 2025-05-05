@@ -15,7 +15,7 @@ import CommentItem from "./CommentItem";
 import AuthObserver from "../../../utils/AuthObserver";
 import { emit } from "../../../utils/EventBus";
 import Constants from 'expo-constants';
-const API_URL = Constants.manifest.extra.API_URL_DATA;
+const API_URL = Constants.expoConfig.extra.API_URL_DATA;
 
 export default function Comments({ postId }) {
   const { comments: initialComments, refreshComments } = useComments(postId);

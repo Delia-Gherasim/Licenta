@@ -5,7 +5,7 @@ import { Image, Platform, StyleSheet, Text, TouchableOpacity, View } from "react
 import MobileCamera from "./MobileCamera";
 import WebCamera from "./WebCamera";
 import { useIsFocused } from "@react-navigation/native";
-import { ScrollView } from "react-native-web";
+import { ScrollView } from "react-native";
 
 export default function Add() {
   const navigation = useNavigation();

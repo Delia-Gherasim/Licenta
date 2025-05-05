@@ -8,7 +8,6 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
-import { getAuth } from "firebase/auth";
 import Toast from "react-native-toast-message";
 import AuthObserver from "../../utils/AuthObserver";
 

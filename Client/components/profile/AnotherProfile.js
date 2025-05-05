@@ -16,7 +16,7 @@ import AuthObserver from "../../utils/AuthObserver";
 import PostDetails from "../Post/PostComponent/PostDetails";
 import { Ionicons } from '@expo/vector-icons';
 import Constants from 'expo-constants';
-const API_URL = Constants.manifest.extra.API_URL_DATA;
+const API_URL = Constants.expoConfig.extra.API_URL_DATA;
 const AnotherProfile = () => {
   const [userData, setUserData] = useState(null);
   const [posts, setPosts] = useState([]);

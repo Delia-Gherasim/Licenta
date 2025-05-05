@@ -4,7 +4,7 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import AuthObserver from '../../utils/AuthObserver';
 import { useNotifications } from '../../NotificationContext'; 
 import Constants from 'expo-constants';
-const API_URL = Constants.manifest.extra.API_URL_DATA;
+const API_URL = Constants.expoConfig.extra.API_URL_DATA;
 const VoteButtons = ({ commentId }) => {
   const [userVote, setUserVote] = useState(null);
   const [totalVotes, setTotalVotes] = useState(0);

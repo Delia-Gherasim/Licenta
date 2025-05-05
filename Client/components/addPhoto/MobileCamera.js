@@ -1,84 +1,98 @@
-import React, { useState, useRef, useEffect } from "react";
-import { Camera } from "expo-camera";
-import { Platform, StyleSheet, View, TouchableOpacity, Text } from "react-native";
+import React, { useState, useEffect } from "react";
+import * as ImagePicker from "expo-image-picker";
+import { StyleSheet, View, TouchableOpacity, Text } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
 export default function MobileCamera({ setImageUri, pickImage }) {
   const [hasPermission, setHasPermission] = useState(null);
-  const [cameraType, setCameraType] = useState(Camera.Constants.Type.back);
-  const [flashMode, setFlashMode] = useState(Camera.Constants.FlashMode.off);
-  const [zoom, setZoom] = useState(0);
-  const cameraRef = useRef(null);
+  const [errorMessage, setErrorMessage] = useState("");
 
+  // Request camera permissions when the component mounts
   useEffect(() => {
-    (async () => {
-      const { status } = await Camera.requestPermissionsAsync();
-      setHasPermission(status === "granted");
-    })();
+    const requestPermissions = async () => {
+      try {
+        const { status } = await ImagePicker.requestCameraPermissionsAsync();
+        if (status === "granted") {
+          setHasPermission(true);
+        } else {
+          setHasPermission(false);
+        }
+      } catch (error) {
+        setErrorMessage("Failed to get camera permissions. Please try again.");
+        setHasPermission(false);
+      }
+    };
+
+    requestPermissions();
   }, []);
 
-  const toggleCameraType = () => {
-    setCameraType((prev) =>
-      prev === Camera.Constants.Type.back
-        ? Camera.Constants.Type.front
-        : Camera.Constants.Type.back
-    );
-  };
-
-  const toggleFlash = () => {
-    setFlashMode((prev) =>
-      prev === Camera.Constants.FlashMode.off
-        ? Camera.Constants.FlashMode.on
-        : Camera.Constants.FlashMode.off
-    );
-  };
-
+  // Function to open the camera app and capture a photo
   const takePhoto = async () => {
-    if (cameraRef.current) {
-      const photo = await cameraRef.current.takePictureAsync();
-      setImageUri(photo.uri);
+    try {
+      const result = await ImagePicker.launchCameraAsync({
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 1,
+      });
+
+      if (!result.canceled) {
+        setImageUri(result.uri);
+      } else {
+        setErrorMessage("Photo capture was canceled.");
+      }
+    } catch (error) {
+      setErrorMessage("An error occurred while capturing the photo. Please try again.");
     }
   };
 
+  // Handle the loading state when requesting permissions
+  if (hasPermission === null) {
+    return <Text>Requesting camera permission...</Text>;
+  }
+
+  // Handle the case where permission is denied
+  if (hasPermission === false) {
+    return <Text>{errorMessage || "No access to camera"}</Text>;
+  }
+
   return (
-    <>
-      {hasPermission ? (
-        <Camera
-          style={styles.camera}
-          type={cameraType}
-          flashMode={flashMode}
-          zoom={zoom}
-          ref={cameraRef}
-        >
-        </Camera>
-      ) : (
-        <Text style={styles.statusText}>Requesting permissions...</Text>
-      )}
-      <TouchableOpacity onPress={pickImage} style={[styles.iconButton, styles.folderButton]}>
-        <Ionicons name="folder-open" size={32} color="white" />
-      </TouchableOpacity>
-      <TouchableOpacity onPress={takePhoto} style={styles.captureButton}>
-        <Ionicons name="camera" size={24} color="white" />
-      </TouchableOpacity>
-      <TouchableOpacity onPress={toggleFlash} style={[styles.iconButton, styles.flashButton]}>
-        <Ionicons name={flashMode === Camera.Constants.FlashMode.off ? "flash-off" : "flash"} size={32} color="white" />
-      </TouchableOpacity>
-      <TouchableOpacity onPress={toggleCameraType} style={[styles.iconButton, styles.switchButton]}>
-        <Ionicons name="camera-reverse" size={32} color="white" />
-      </TouchableOpacity>
-    </>
+    <View style={styles.container}>
+      <View style={styles.cameraControls}>
+        {/* Button to open gallery */}
+        <TouchableOpacity onPress={pickImage} style={[styles.iconButton, styles.folderButton]}>
+          <Ionicons name="folder-open" size={32} color="white" />
+        </TouchableOpacity>
+
+        {/* Button to open the device's camera app */}
+        <TouchableOpacity onPress={takePhoto} style={styles.captureButton}>
+          <Ionicons name="camera" size={24} color="white" />
+        </TouchableOpacity>
+      </View>
+
+      {/* Display error message if any */}
+      {errorMessage && <Text style={styles.errorMessage}>{errorMessage}</Text>}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  camera: {
-    width: "100%",
-    height: "100%",
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  cameraControls: {
+    position: "absolute",
+    bottom: 20,
+    left: 20,
+    right: 20,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   iconButton: {
-    position: "absolute",
     padding: 10,
-    backgroundColor: "#416788",  
+    backgroundColor: "#416788",
     borderRadius: 50,
   },
   folderButton: {
@@ -88,19 +102,15 @@ const styles = StyleSheet.create({
   captureButton: {
     bottom: 20,
     left: "50%",
-    transform: [{ translateX: -30 }], 
+    transform: [{ translateX: -30 }],
   },
-  flashButton: {
-    bottom: 20,
-    right: 80,
-  },
-  switchButton: {
-    bottom: 20,
-    right: 20, 
-  },
-  statusText: {
-    color: "white",
+  errorMessage: {
+    position: "absolute",
+    bottom: 60,
+    color: "red",
+    fontSize: 16,
+    fontWeight: "bold",
     textAlign: "center",
-    marginTop: 20,
+    width: "100%",
   },
 });

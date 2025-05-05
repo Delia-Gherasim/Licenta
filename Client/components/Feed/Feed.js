@@ -14,9 +14,9 @@ import PostItem from "../Post/PostComponent/PostItem";
 import { Dimensions } from "react-native";
 import Toast from "react-native-toast-message";
 import Constants from 'expo-constants';
-const API_URL = Constants.manifest.extra.API_URL_DATA;
+const API_URL = Constants.expoConfig.extra.API_URL_DATA;
 
-const POST_STORAGE_KEY = Constants.manifest.extra.POST_STORAGE_KEY;
+const POST_STORAGE_KEY = Constants.expoConfig.extra.POST_STORAGE_KEY;
 
 export default function Feed({ userId }) {
   const [posts, setPosts] = useState([]);

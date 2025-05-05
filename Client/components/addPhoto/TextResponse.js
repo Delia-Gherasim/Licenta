@@ -1,7 +1,7 @@
 import React from 'react';
 import { Text } from 'react-native';
 import Constants from 'expo-constants';
-const API_URL_CHATBOT = Constants.manifest.extra.API_URL_CHATBOT;
+const API_URL_CHATBOT = Constants.expoConfig.extra.API_URL_CHATBOT;
 export default class TextResponse {
   static async process(formData) {
     const API_URL = API_URL_CHATBOT+"/advice";

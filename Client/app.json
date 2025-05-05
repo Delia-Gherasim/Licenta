@@ -3,8 +3,8 @@
     "name": "socialMediaServices",
     "slug": "socialMediaServices",
     "extra" : {
-      "API_URL_DATA": "http://localhost:8000/data",
-      "API_URL_CHATBOT":"http://localhost:8000/chatbot",
+      "API_URL_DATA": "http://192.168.143.162:8000/data",
+      "API_URL_CHATBOT":"http://192.168.143.162:8000/chatbot",
       "POST_STORAGE_KEY": "cachedPosts",
       "CLOUDINARY_URL" : "https://api.cloudinary.com/v1_1/df2iifqrf/image/upload",
       "CLOUDINARY_PRESET" :"ml_default",

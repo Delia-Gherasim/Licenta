@@ -10,7 +10,7 @@ import {
 import Toast from 'react-native-toast-message';
 import { emitPostChange } from "../../../utils/PostEvent";
 import Constants from 'expo-constants';
-const API_URL = Constants.manifest.extra.API_URL_DATA;
+const API_URL = Constants.expoConfig.extra.API_URL_DATA;
 
 const extractHashtags = (caption) => {
   const matches = caption.match(/#\w+/g);

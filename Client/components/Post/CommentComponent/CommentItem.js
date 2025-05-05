@@ -9,7 +9,7 @@ import {
 import VoteButtons from "../VoteButtons";
 import ReplyInput from "./ReplyInput";
 import Constants from 'expo-constants';
-const API_URL = Constants.manifest.extra.API_URL_DATA;
+const API_URL = Constants.expoConfig.extra.API_URL_DATA;
 
 const CommentItem = ({
   comment,

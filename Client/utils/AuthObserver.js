@@ -14,7 +14,7 @@ import {
 } from "firebase/auth";
 import { getFirestore, setDoc, doc } from "firebase/firestore";
 import Constants from 'expo-constants';
-const API_URL = Constants.manifest.extra.API_URL_DATA;
+const API_URL = Constants.expoConfig.extra.API_URL_DATA;
 const USER_ID_KEY = "currentUserId";
 const POST_STORAGE_KEY = "cachedPosts";
 

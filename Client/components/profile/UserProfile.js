@@ -22,7 +22,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Dimensions } from "react-native";
 import { subscribe } from "../../utils/EventBus";
 import Constants from 'expo-constants';
-const API_URL = Constants.manifest.extra.API_URL_DATA;
+const API_URL = Constants.expoConfig.extra.API_URL_DATA;
 const UserProfile = () => {
     const [userData, setUserData] = useState(null);
     const [posts, setPosts] = useState([]);

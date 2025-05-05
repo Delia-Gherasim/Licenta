@@ -1,6 +1,12 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
+import {
+  getAuth,
+  initializeAuth,
+  getReactNativePersistence,
+} from "firebase/auth";
 import Constants from 'expo-constants';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+const extraConfig = Constants.manifest ? Constants.manifest.extra : Constants.expoConfig?.extra;
 
 const {
   FIREBASE_API_KEY,
@@ -10,7 +16,11 @@ const {
   FIREBASE_MESSAGING_SENDER_ID,
   FIREBASE_APP_ID,
   FIREBASE_MEASUREMENT_ID,
-} = Constants.manifest?.extra || {}; 
+} = extraConfig || {};
+
+if (!extraConfig) {
+  console.warn("Warning: Could not load Firebase configuration from 'app.json' extra.");
+}
 
 const firebaseConfig = {
   apiKey: FIREBASE_API_KEY,
@@ -22,7 +32,24 @@ const firebaseConfig = {
   measurementId: FIREBASE_MEASUREMENT_ID,
 };
 
-const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
-const auth = getAuth(app);
+let app;
+try {
+  app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
+} catch (error) {
+  console.error("Error initializing Firebase app:", error);
+}
+
+let auth;
+try {
+  if (typeof window === 'undefined') {
+    auth = initializeAuth(app, {
+      persistence: getReactNativePersistence(AsyncStorage),
+    });
+  } else {
+    auth = getAuth(app);
+  }
+} catch (error) {
+  console.error("Error initializing Firebase auth:", error);
+}
 
 export { app, auth };

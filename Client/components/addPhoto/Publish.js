@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { ScrollView, Alert, Button, Image, StyleSheet, TextInput, View, Text, TouchableOpacity } from "react-native";
 import NetInfo from "@react-native-community/netinfo";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { getAuth } from "firebase/auth";
 import { useNavigation } from "@react-navigation/native";
 import useOfflinePostSync from "../../utils/OfflinePost";
 import { uploadToCloudinary } from "../../utils/CloudinaryConfig";  
@@ -11,7 +10,7 @@ import { emitPostAdded } from "../../utils/PostEvent";
 import { Dimensions } from 'react-native';
 import { Platform } from 'react-native';
 import Constants from 'expo-constants';
-const API_URL = Constants.manifest.extra.API_URL_DATA;
+const API_URL = Constants.expoConfig.extra.API_URL_DATA;
 const { width, height } = Dimensions.get('window');
 
 const isPortrait = height > width;

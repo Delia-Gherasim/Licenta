@@ -12,19 +12,13 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import AuthObserver from "../../utils/AuthObserver";
-import {
-  getAuth,
-  reauthenticateWithCredential,
-  EmailAuthProvider,
-} from "firebase/auth";
 import * as SecureStore from "expo-secure-store";
-import { updatePassword } from "firebase/auth";
 import Toast from "react-native-toast-message";
 import { Dimensions } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { emitPostChange } from "../../utils/PostEvent";
 import Constants from 'expo-constants';
-const API_URL = Constants.manifest.extra.API_URL_DATA;
+const API_URL = Constants.expoConfig.extra.API_URL_DATA;
 export default function Settings() {
   const [userData, setUserData] = useState(null);
   const [newName, setNewName] = useState("");
