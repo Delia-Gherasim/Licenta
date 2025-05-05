@@ -1,39 +1,45 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Text,
   View,
-  Button,
   StyleSheet,
-  Alert,
   TouchableOpacity,
   ScrollView,
+  RefreshControl,
+  Switch,
 } from "react-native";
 import NetInfo from "@react-native-community/netinfo";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import PostItem from "../Post/PostComponent/PostItem";
+import { Dimensions } from "react-native";
+import Toast from "react-native-toast-message";
+import Constants from 'expo-constants';
+const API_URL = Constants.manifest.extra.API_URL_DATA;
 
-const POST_STORAGE_KEY = "cachedPosts";
+const POST_STORAGE_KEY = Constants.manifest.extra.POST_STORAGE_KEY;
 
 export default function Feed({ userId }) {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [activeFeed, setActiveFeed] = useState(null);
+  const [activeFeed, setActiveFeed] = useState("global");
   const [isConnected, setIsConnected] = useState(true);
   const [wasOffline, setWasOffline] = useState(false);
   const [showRefreshButton, setShowRefreshButton] = useState(false);
   const [fetchError, setFetchError] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const fetchWithTimeout = (url, options = {}, timeout = 5000) => {
+  const fetchWithTimeout = useCallback((url, options = {}, timeout = 5000) => {
     return Promise.race([
       fetch(url, options),
       new Promise((_, reject) =>
         setTimeout(() => reject(new Error("Timeout")), timeout)
       ),
     ]);
-  };
+  }, []);
 
-  const savePostsToLocalStorage = async (posts) => {
+  const savePostsToLocalStorage = useCallback(async (posts) => {
     try {
+      if (!Array.isArray(posts)) return;
       const sorted = [...posts].sort(
         (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
       );
@@ -42,49 +48,66 @@ export default function Feed({ userId }) {
     } catch (error) {
       console.error("Error saving to AsyncStorage", error);
     }
-  };
+  }, []);
 
-  const loadPostsFromLocalStorage = async () => {
+  const loadPostsFromLocalStorage = useCallback(async () => {
     try {
       const stored = await AsyncStorage.getItem(POST_STORAGE_KEY);
       if (stored) {
-        setPosts(JSON.parse(stored));
+        const parsed = JSON.parse(stored);
+        setPosts(parsed);
         setFetchError(true);
+        return parsed;
+      } else {
+        setPosts([]);
+        return [];
       }
     } catch (error) {
       console.error("Error loading from AsyncStorage", error);
+      setPosts([]);
+      return [];
     }
-  };
+  }, []);
 
-  const fetchPosts = async (type) => {
-    const endpoint =
-      type === "friends"
-        ? `http://localhost:8000/data/posts/all_friends/${userId}`
-        : "http://localhost:8000/data/posts/";
+  const fetchPosts = useCallback(
+    async (type) => {
+      const endpoint =
+        type === "friends"
+          ? `${API_URL}/posts/all_friends/${userId}`
+          : API_URL+"/posts/";
 
-    setActiveFeed(type);
-    setLoading(true);
-    setFetchError(false);
+      setActiveFeed(type);
+      setLoading(true);
+      setFetchError(false);
+      setIsRefreshing(false);
 
-    try {
-      const response = await fetchWithTimeout(endpoint);
-      if (!response.ok) throw new Error("Server error");
+      try {
+        const response = await fetchWithTimeout(endpoint);
+        if (!response.ok) throw new Error("Server error");
 
-      const data = await response.json();
-      setPosts(data.posts);
-      await savePostsToLocalStorage(data.posts);
-    } catch (error) {
-      console.error(`Error fetching ${type} posts:`, error);
-      await loadPostsFromLocalStorage();
-    } finally {
-      setLoading(false);
-    }
-  };
+        const data = await response.json();
+        if (!Array.isArray(data.posts)) throw new Error("Invalid posts data");
 
-  const refreshCurrentFeed = () => {
+        setPosts(data.posts);
+        await savePostsToLocalStorage(data.posts);
+      } catch (error) {
+        console.error(`Error fetching ${type} posts:`, error);
+        const localPosts = await loadPostsFromLocalStorage();
+        if (!Array.isArray(localPosts)) {
+          setPosts([]);
+        }
+      } finally {
+        setLoading(false);
+      }
+    },
+    [fetchWithTimeout, savePostsToLocalStorage, loadPostsFromLocalStorage, userId]
+  );
+
+  const refreshCurrentFeed = useCallback(() => {
     setShowRefreshButton(false);
+    setIsRefreshing(true);
     if (activeFeed) fetchPosts(activeFeed);
-  };
+  }, [activeFeed, fetchPosts]);
 
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener((state) => {
@@ -93,11 +116,12 @@ export default function Feed({ userId }) {
       if (!nowConnected && isConnected) {
         setIsConnected(false);
         setWasOffline(true);
-        Alert.alert(
-          "No Internet Connection",
-          "You are offline. Showing cached posts if available.",
-          [{ text: "OK" }]
-        );
+        Toast.show({
+          type: "error",
+          position: "bottom",
+          text1: "No Internet Connection",
+          text2: "You are offline. Showing cached posts if available.",
+        });
         loadPostsFromLocalStorage();
       }
 
@@ -106,77 +130,119 @@ export default function Feed({ userId }) {
         if (wasOffline) {
           setShowRefreshButton(true);
           setWasOffline(false);
-          Alert.alert("Back Online", "You can now refresh the feed.");
+          Toast.show({
+            type: "success",
+            position: "bottom",
+            text1: "Back Online",
+            text2: "You can now refresh the feed.",
+          });
         }
       }
     });
 
     return () => unsubscribe();
-  }, [isConnected, wasOffline, activeFeed]);
+  }, [isConnected, wasOffline, loadPostsFromLocalStorage]);
+
+  useEffect(() => {
+    fetchPosts(activeFeed);
+  }, [fetchPosts, activeFeed]);
+
+  const handleSwitchChange = (value) => {
+    const feedType = value ? "global" : "friends";
+    fetchPosts(feedType);
+  };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.header}>Feed</Text>
-      <View style={styles.buttonsContainer}>
-        <Button title="Friends" onPress={() => fetchPosts("friends")} />
-        <Button title="Global" onPress={() => fetchPosts("global")} />
-      </View>
-
-      {showRefreshButton && (
-        <TouchableOpacity style={styles.refreshButton} onPress={refreshCurrentFeed}>
-          <Text style={styles.refreshText}>🔄 Refresh Feed</Text>
-        </TouchableOpacity>
-      )}
-
-{loading ? (
-  <Text>Loading...</Text>
-) : fetchError ? (
-  <Text style={styles.errorText}>
-    {typeof fetchError === 'string' ? fetchError : 'Unable to load live data. Showing cached posts.'}
-  </Text>
-) : null}
-
-      
-      <ScrollView 
+    <View style={styles.viewOf}>
+      <ScrollView
         style={styles.scrollView}
-        contentContainerStyle={styles.scrollContainer}
+        contentContainerStyle={styles.scrollContent}
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefreshing}
+            onRefresh={refreshCurrentFeed}
+          />
+        }
       >
-        {posts.map((post) => (
-          <View key={post.postId} style={styles.postWrapper}>
-            <PostItem post={post} userId={userId} />
+        <View style={styles.headerContainer}>
+          <View style={styles.stickySwitchContainer}>
+            <Text style={styles.switchLabel}>Friends</Text>
+            <Switch
+              value={activeFeed === "global"}
+              onValueChange={handleSwitchChange}
+            />
+            <Text style={styles.switchLabel}>Global</Text>
           </View>
-        ))}
+
+          {showRefreshButton && (
+            <TouchableOpacity
+              style={styles.refreshButton}
+              onPress={refreshCurrentFeed}
+            >
+              <Text style={styles.refreshText}>🔄 Refresh Feed</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+
+        {loading ? (
+          <Text>Loading...</Text>
+        ) : fetchError && posts.length === 0 ? (
+          <Text style={styles.infoText}>No posts available in this feed.</Text>
+        ) : posts.length === 0 && !loading ? (
+          <Text style={styles.infoText}>No posts available in this feed.</Text>
+        ) : (
+          <View>
+            {posts.map((post) => (
+              <View
+                style={styles.postWrapper}
+                key={post?.postId?.toString() ?? Math.random().toString()}
+              >
+                <PostItem post={post} userId={userId} />
+              </View>
+            ))}
+          </View>
+        )}
+        <View style={styles.bottomSpace} />
       </ScrollView>
     </View>
   );
 }
 
+const screenHeight = Dimensions.get("window").height;
+
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
+  viewOf: {
+    height: screenHeight,
+    backgroundColor: "#E0E0E2",
   },
   scrollView: {
     flex: 1,
   },
-  scrollContainer: {
-    paddingVertical: 20,
+  bottomSpace: {
+    height: 80, 
+},
+  scrollContent: {
+    paddingVertical: 10,
     paddingHorizontal: 10,
-  flexGrow: 1,
+    flexGrow: 1,
   },
-  postWrapper: {
+  headerContainer: {
     marginBottom: 10,
+    padding: 10,
+    zIndex: 10,
   },
-  header: {
-    fontSize: 24,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginVertical: 10,
-  },
-  buttonsContainer: {
+  stickySwitchContainer: {
     flexDirection: "row",
-    justifyContent: "space-around",
-    marginVertical: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 0,
+    backgroundColor: "#E0E0E2",
+    zIndex: 1,
+    padding: 10,
+  },
+  switchLabel: {
+    fontSize: 16,
+    marginHorizontal: 10,
   },
   refreshButton: {
     alignItems: "center",
@@ -194,5 +260,13 @@ const styles = StyleSheet.create({
     color: "red",
     textAlign: "center",
     marginTop: 20,
+  },
+  infoText: {
+    color: "gray",
+    textAlign: "center",
+    marginTop: 20,
+  },
+  postWrapper: {
+    marginBottom: 5,
   },
 });

@@ -12,9 +12,9 @@ import { useNavigation } from "@react-navigation/native";
 import { uploadToCloudinary } from "../../utils/CloudinaryConfig";
 import * as FileSystem from "expo-file-system";
 import * as mime from 'mime-types';
-
-// Import the TextResponse class
+import { Dimensions } from "react-native";
 import TextResponse from "./TextResponse";
+import Constants from 'expo-constants';
 
 export default function Analyze({ route }) {
   const { imageUri } = route.params;
@@ -29,8 +29,15 @@ export default function Analyze({ route }) {
   const [showCameraAnimation, setShowCameraAnimation] = useState(false);
   const scrollViewRef = useRef();
 
-  const API_URL = "http://localhost:8000/chatbot";
-
+  const API_URL = Constants.manifest.extra.API_URL_CHATBOT;
+  const optionLabels = {
+    aesthetic_score: "Aesthetic Score",
+    technical_quality: "Technical Quality",
+    object_advice: "Object Advice",
+    scene_advice: "Scene Advice",
+    general_advice: "General Advice",
+    genre_advice: "Genre Advice",
+  };
   useEffect(() => {
     fetchOptions();
   }, []);
@@ -84,7 +91,6 @@ export default function Analyze({ route }) {
 
   const submitAdvice = async (choice, sub_choice) => {
     try {
-      // Upload the image to Cloudinary
       const imageUrl = await uploadToCloudinary(imageUri);
       if (!imageUrl) {
         console.error("Cloudinary upload failed");
@@ -92,13 +98,11 @@ export default function Analyze({ route }) {
       }
   
       let formData = new FormData();
-      formData.append("image_url", imageUrl);  // Ensure the key here matches what the server expects
+      formData.append("image_url", imageUrl);  
       formData.append("choice", choice);
       if (sub_choice) formData.append("sub_choice", sub_choice);
   
       setLoading(true);
-      
-      // Use TextResponse class to get the result
       const result = await TextResponse.process(formData);
   
       if (React.isValidElement(result)) {
@@ -209,7 +213,7 @@ export default function Analyze({ route }) {
             style={styles.option}
             onPress={() => handleOptionSelect(opt)}
           >
-            <Text style={styles.optionText}>{opt}</Text>
+            <Text style={styles.optionText}>{optionLabels[opt] || opt}</Text>
           </TouchableOpacity>
         ))}
 
@@ -227,68 +231,80 @@ export default function Analyze({ route }) {
       {loading && (
         <View style={styles.loadingContainer}>
           <Image
-            source={require("C://Facultation//licenta//PhotographyAdviceApp//Client//utils//Animation - 1745528021109.gif")}
+            source={require("../../assets/Animation - 1745528021109.gif")} 
             style={styles.loadingAnimation}
           />
           <Text style={styles.thinkingText}>Thinking ...</Text>
         </View>
       )}
+      <View style={{ height: 80}} />
     </ScrollView>
   );
 }
-
+const screenHeight = Dimensions.get("window").height;
 const styles = StyleSheet.create({
   container: {
+    height: screenHeight,
     paddingTop: 40,
     paddingHorizontal: 20,
-    backgroundColor: "#222",
+    backgroundColor: "#F4F4F9",
     minHeight: "100%",
+    paddingBottom: 40,
   },
   image: {
     width: 220,
     height: 220,
-    borderRadius: 10,
+    borderRadius: 12,
     alignSelf: "center",
     marginBottom: 20,
+    borderWidth: 2,
+    borderColor: "#D1D1E9",
   },
   option: {
-    backgroundColor: "#444",
-    padding: 12,
+    backgroundColor: "#6A4C93",
+    paddingVertical: 14,
+    paddingHorizontal: 20,
     borderRadius: 10,
     marginVertical: 6,
     alignItems: "center",
+    shadowColor: "#000",
+    shadowOpacity: 0.12,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
   },
   optionText: {
-    color: "#fff",
+    color: "#FFFFFF",
     fontSize: 16,
+    fontWeight: "600",
   },
   userBubble: {
-    backgroundColor: "#007AFF",
-    padding: 10,
-    borderRadius: 12,
+    backgroundColor: "#6A4C93",
+    padding: 12,
+    borderRadius: 14,
     marginBottom: 10,
     alignSelf: "flex-end",
     maxWidth: "80%",
   },
   botBubble: {
-    backgroundColor: "#333",
-    padding: 10,
-    borderRadius: 12,
+    backgroundColor: "#1985A1",
+    padding: 12,
+    borderRadius: 14,
     marginBottom: 10,
     alignSelf: "flex-start",
     maxWidth: "80%",
   },
   messageText: {
-    color: "#fff",
+    color: "#FFFFFF",
     fontSize: 16,
+    lineHeight: 22,
+    flexWrap: "wrap",
   },
   boldText: {
     fontWeight: "bold",
-    color: "#fff",
+    color: "#FFFFFF",
   },
   loadingAnimation: {
-    width: 100,
-    height: 100,
+
     alignSelf: "center",
     marginTop: 10,
   },
@@ -300,19 +316,22 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   thinkingText: {
-    color: "#fff",
+    color: "#555",
     fontSize: 18,
     marginLeft: 10,
+    fontStyle: "italic",
   },
   actionButton: {
-    backgroundColor: "#555",
-    padding: 10,
-    borderRadius: 8,
-    marginTop: 8,
+    backgroundColor: "#6A4C93",
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 10,
+    marginTop: 12,
     alignItems: "center",
   },
   actionButtonText: {
-    color: "#fff",
+    color: "#FFFFFF",
     fontSize: 14,
+    fontWeight: "500",
   },
 });

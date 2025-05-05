@@ -1,68 +1,66 @@
 import React, { Component } from "react";
 import {
-  Alert,
   Button,
   TextInput,
   View,
   StyleSheet,
   ScrollView,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { getAuth } from "firebase/auth";
+import Toast from "react-native-toast-message";
 import AuthObserver from "../../utils/AuthObserver";
 
 export class Login extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      email: "",
-      password: "",
-    };
-    this.onSignIn = this.onSignIn.bind(this);
-  }
+  state = { email: "", password: "" };
 
-  onSignIn() {
+  onSignIn = () => {
     const { email, password } = this.state;
-    const auth = getAuth();
 
     AuthObserver.login(email, password)
-    .then((userCredential) => {
-      Alert.alert("Success", "Signed in successfully!");
-    })
-    .catch((error) => {
-      Alert.alert("Login Error", error.message);
-    });
-  }
+      .then(() => {
+        Toast.show({ type: "success", text1: "Signed in successfully!" });
+      })
+      .catch((error) => {
+        Toast.show({ type: "error", text1: "Login Error", text2: error.message });
+      });
+  };
 
   render() {
     return (
-      <ScrollView contentContainerStyle={styles.container}>
-        <TextInput
-          placeholder="Email"
-          style={styles.input}
-          autoCapitalize="none"
-          keyboardType="email-address"
-          onChangeText={(email) => this.setState({ email })}
-        />
-        <TextInput
-          placeholder="Password"
-          style={styles.input}
-          secureTextEntry={true}
-          onChangeText={(password) => this.setState({ password })}
-        />
-        <View style={styles.buttonContainer}>
-          <Button onPress={this.onSignIn} title="Sign In" color="#6200ea" />
-        </View>
-      </ScrollView>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        style={{ flex: 1 }}
+      >
+        <ScrollView contentContainerStyle={styles.container}>
+          <TextInput
+            placeholder="Email"
+            style={styles.input}
+            autoCapitalize="none"
+            keyboardType="email-address"
+            onChangeText={(email) => this.setState({ email })}
+          />
+          <TextInput
+            placeholder="Password"
+            style={styles.input}
+            secureTextEntry
+            onChangeText={(password) => this.setState({ password })}
+          />
+          <View style={styles.buttonContainer}>
+            <Button onPress={this.onSignIn} title="Sign In" color="#416788" />
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     );
   }
 }
 
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
-    justifyContent: "center",
-    backgroundColor: "#fff",
     flexGrow: 1,
+    justifyContent: "center",
+    padding: 20,
   },
   input: {
     height: 50,
@@ -74,6 +72,7 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     marginTop: 10,
+    width: "100%",
   },
 });
 

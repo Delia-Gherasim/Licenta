@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";  
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -8,12 +8,23 @@ import {
   ScrollView,
   Modal,
   TouchableOpacity,
+  Pressable,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import AuthObserver from "../../utils/AuthObserver"; 
-import { getAuth, reauthenticateWithCredential, EmailAuthProvider } from "firebase/auth";
-import * as SecureStore from 'expo-secure-store';
-
+import AuthObserver from "../../utils/AuthObserver";
+import {
+  getAuth,
+  reauthenticateWithCredential,
+  EmailAuthProvider,
+} from "firebase/auth";
+import * as SecureStore from "expo-secure-store";
+import { updatePassword } from "firebase/auth";
+import Toast from "react-native-toast-message";
+import { Dimensions } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { emitPostChange } from "../../utils/PostEvent";
+import Constants from 'expo-constants';
+const API_URL = Constants.manifest.extra.API_URL_DATA;
 export default function Settings() {
   const [userData, setUserData] = useState(null);
   const [newName, setNewName] = useState("");
@@ -23,7 +34,7 @@ export default function Settings() {
   const [bio, setBio] = useState("");
   const [loading, setLoading] = useState(false);
   const [isPasswordUpdating, setIsPasswordUpdating] = useState(false);
-  const [currentPassword, setCurrentPassword] = useState(""); 
+  const [currentPassword, setCurrentPassword] = useState("");
 
   const [isDeletePostsModalVisible, setDeletePostsModalVisible] = useState(false);
   const [isDeleteAccountModalVisible, setDeleteAccountModalVisible] = useState(false);
@@ -48,23 +59,22 @@ export default function Settings() {
     };
   }, []);
 
- const fetchUserData = async (userId) => {
-  try {
-    const res = await fetch(`http://localhost:8000/data/users/${userId}`);
-    const json = await res.json();
-    if (json.error) {
-      throw new Error(json.error); // Handle the error case if 'error' key exists in the response
+  const fetchUserData = async (userId) => {
+    try {
+      const res = await fetch(`${API_URL}/users/${userId}`);
+      const json = await res.json();
+      if (json.error) {
+        throw new Error(json.error);
+      }
+      setUserData(json);
+      setNewName(json.name);
+      setNewEmail(json.email);
+      setBio(json.bio);
+    } catch (err) {
+      console.error("Error fetching user data:", err);
+      setUserData({ error: err.message });
     }
-    setUserData(json);
-    setNewName(json.name);
-    setNewEmail(json.email);
-    setBio(json.bio);
-  } catch (err) {
-    console.error("Error fetching user data:", err);
-    setUserData({ error: err.message }); // Store the error in userData
-  }
-};
-
+  };
 
   const clearUserData = async () => {
     try {
@@ -82,36 +92,47 @@ export default function Settings() {
     try {
       await AuthObserver.logout();
       clearUserData();
+      Toast.show({
+        type: "success",
+        text1: "Logged Out",
+        text2: "You have been logged out successfully.",
+      });
       navigation.navigate("Login");
     } catch (error) {
       console.error("Logout Error", error);
-    }
-  };
-
-  const reauthenticateUser = async () => {
-    const user = AuthObserver.getCurrentUser();
-    if (user && currentPassword) {
-      const credential = EmailAuthProvider.credential(user.email, currentPassword);
-      try {
-        await reauthenticateWithCredential(user, credential);
-      } catch (error) {
-        console.log("Re-authentication failed:", error);
-      }
+      Toast.show({
+        type: "error",
+        text1: "Logout Failed",
+        text2: error.message || "Something went wrong during logout.",
+      });
     }
   };
 
   const updatePasswordHandler = async () => {
     if (newPassword !== confirmPassword) {
+      Toast.show({
+        type: "error",
+        text1: "Password Mismatch",
+        text2: "New password and confirmation do not match",
+      });
       return;
     }
 
     setIsPasswordUpdating(true);
     try {
-      const user = AuthObserver.getCurrentUser();
-      await reauthenticateUser();
-      await user.updatePassword(newPassword);
+      await AuthObserver.updatePassword(newPassword, currentPassword);
+      Toast.show({
+        type: "success",
+        text1: "Password Updated",
+        text2: "Your password was successfully changed",
+      });
     } catch (error) {
       console.error("Password update error:", error);
+      Toast.show({
+        type: "error",
+        text1: "Update Failed",
+        text2: error.message || "Something went wrong",
+      });
     } finally {
       setIsPasswordUpdating(false);
     }
@@ -123,218 +144,280 @@ export default function Settings() {
       const user = AuthObserver.getCurrentUser();
       const userId = user?.uid;
       const payload = { id: userId, name: newName, email: newEmail, bio };
-      const res = await fetch(`http://localhost:8000/data/users/${userId}`, {
+      const res = await fetch(`${API_URL}/users/${userId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
+
       if (!res.ok) throw new Error("Failed to update user data");
 
       if (newEmail !== userData.email) {
-        await AuthObserver.getCurrentUser().updateEmail(newEmail);
+        await AuthObserver.updateEmail(newEmail);
       }
 
       setUserData({ ...userData, ...payload });
+
+      Toast.show({
+        type: "success",
+        text1: "Profile Updated",
+        text2: "Your profile was successfully updated.",
+      });
     } catch (error) {
       console.error("Update error:", error);
+      Toast.show({
+        type: "error",
+        text1: "Update Failed",
+        text2:
+          error.message || "Something went wrong while updating your profile.",
+      });
     } finally {
       setLoading(false);
     }
   };
 
-  const deleteAllPosts = () => {
-    setDeletePostsModalVisible(true);
-  };
-
+  const deleteAllPosts = () => setDeletePostsModalVisible(true);
   const confirmDeleteAllPosts = async () => {
     setDeletePostsModalVisible(false);
+    
     try {
       const user = AuthObserver.getCurrentUser();
-      const res = await fetch(`http://localhost:8000/data/posts/user/${user?.uid}/delete`, {
-        method: "DELETE",
-      });
-
+      const res = await fetch(
+        `${API_URL}/posts/user/${user?.uid}/delete`,
+        { method: "DELETE" }
+      );
       if (!res.ok) throw new Error("Failed to delete posts");
+      Toast.show({ type: "success", text1: "Posts Deleted" });
+      emitPostChange();
     } catch (error) {
-      console.error("Error:", error);
+      Toast.show({ type: "error", text1: "Error", text2: error.message });
     }
   };
 
-  const deleteAccount = () => {
-    setDeleteAccountModalVisible(true);
-  };
-
+  const deleteAccount = () => setDeleteAccountModalVisible(true);
   const confirmDeleteAccount = async () => {
     setDeleteAccountModalVisible(false);
     try {
       const user = AuthObserver.getCurrentUser();
-      const userId = user?.uid;
-
-      const res = await fetch(`http://localhost:8000/data/users/${userId}`, {
+      const res = await fetch(`${API_URL}/users/${user?.uid}`, {
         method: "DELETE",
       });
-
       if (!res.ok) throw new Error("Failed to delete account");
-
       await user.delete();
+      Toast.show({ type: "success", text1: "Account Deleted" });
       navigation.navigate("Login");
     } catch (error) {
-      console.error("Error:", error);
+      Toast.show({ type: "error", text1: "Error", text2: error.message });
     }
   };
-  console.log("SETTINGS")
+
   return (
-    <ScrollView style={styles.container}>
-      <View>
-     
-      {userData && (
-        <>
-          <Text>Username:</Text>
-          <TextInput value={newName} onChangeText={setNewName} placeholder="Enter your new username" style={styles.input} />
-          <Text>Email:</Text>
-          <TextInput value={newEmail} onChangeText={setNewEmail} placeholder="Enter your new email" style={styles.input} />
-          <Text>Bio:</Text>
-          <TextInput value={bio} onChangeText={setBio} placeholder="Enter your bio" style={styles.input} />
-          <Text>Current Password:</Text>
-          <TextInput
-            secureTextEntry
-            value={currentPassword}
-            onChangeText={setCurrentPassword}
-            placeholder="Enter your current password"
-            style={styles.input}
-          />
-
-          <Text>Password:</Text>
-          <TextInput
-            secureTextEntry
-            value={newPassword}
-            onChangeText={setNewPassword}
-            placeholder="Enter new password"
-            style={styles.input}
-          />
-
-          <Text>Confirm Password:</Text>
-          <TextInput
-            secureTextEntry
-            value={confirmPassword}
-            onChangeText={setConfirmPassword}
-            placeholder="Confirm your new password"
-            style={styles.input}
-          />
-          <Button title={loading ? "Updating..." : "Update User Data"} onPress={updateUserData} />
-          <Button title={isPasswordUpdating ? "Updating Password..." : "Update Password"} onPress={updatePasswordHandler} />
-
-          <Button title="Delete All Posts" color="red" onPress={deleteAllPosts} />
-          <Button title="Delete Account" color="red" onPress={deleteAccount} />
-          <Button title="Go Back" onPress={() => navigation.navigate("Profile")} />
-        </>
-      )}
-      <Button title="Log Out" onPress={() => setLogOutModalVisible(true)} />
-
-      <Modal transparent visible={isLogOutModalVisible} animationType="slide" onRequestClose={() => setLogOutModalVisible(false)}>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContainer}>
-            <Text style={styles.modalTitle}>Log Out</Text>
-            <Text style={styles.modalText}>Are you sure you want to log out?</Text>
-            <View style={styles.modalButtons}>
-              <TouchableOpacity onPress={() => setLogOutModalVisible(false)} style={styles.cancelButton}>
-                <Text style={styles.buttonText}>Cancel</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={onLogOut} style={styles.deleteButton}>
-                <Text style={styles.buttonText}>Log Out</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
-
-      <Modal transparent visible={isDeletePostsModalVisible} animationType="slide" onRequestClose={() => setDeletePostsModalVisible(false)}>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContainer}>
-            <Text style={styles.modalTitle}>Delete All Posts</Text>
-            <Text style={styles.modalText}>Are you sure you want to delete all your posts? This action cannot be undone.</Text>
-            <View style={styles.modalButtons}>
-              <TouchableOpacity onPress={() => setDeletePostsModalVisible(false)} style={styles.cancelButton}>
-                <Text style={styles.buttonText}>Cancel</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={confirmDeleteAllPosts} style={styles.deleteButton}>
-                <Text style={styles.buttonText}>Delete</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
-
-      <Modal transparent visible={isDeleteAccountModalVisible} animationType="slide" onRequestClose={() => setDeleteAccountModalVisible(false)}>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContainer}>
-            <Text style={styles.modalTitle}>Delete Account</Text>
-            <Text style={styles.modalText}>Are you sure you want to delete your account? This action cannot be undone.</Text>
-            <View style={styles.modalButtons}>
-              <TouchableOpacity onPress={() => setDeleteAccountModalVisible(false)} style={styles.cancelButton}>
-                <Text style={styles.buttonText}>Cancel</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={confirmDeleteAccount} style={styles.deleteButton}>
-                <Text style={styles.buttonText}>Delete</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
+    <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
+      <View style={styles.header}>
+        <Pressable onPress={() => navigation.goBack()}>
+          <Ionicons name="arrow-back" size={28} color="#372554" />
+        </Pressable>
+        <Text style={styles.headerTitle}>Settings</Text>
       </View>
+      <View style={styles.container}>
+        {userData && (
+          <>
+            <Text style={styles.label}>Username</Text>
+            <TextInput value={newName} onChangeText={setNewName} placeholder="Enter your new username" style={styles.input} />
+
+            <Text style={styles.label}>Email</Text>
+            <TextInput value={newEmail} onChangeText={setNewEmail} placeholder="Enter your new email" style={styles.input} />
+
+            <Text style={styles.label}>Bio</Text>
+            <TextInput value={bio} onChangeText={setBio} placeholder="Enter your bio" style={styles.input} />
+
+            <Text style={styles.label}>Current Password</Text>
+            <TextInput secureTextEntry value={currentPassword} onChangeText={setCurrentPassword} placeholder="Enter your current password" style={styles.input} />
+
+            <Text style={styles.label}>New Password</Text>
+            <TextInput secureTextEntry value={newPassword} onChangeText={setNewPassword} placeholder="Enter new password" style={styles.input} />
+
+            <Text style={styles.label}>Confirm Password</Text>
+            <TextInput secureTextEntry value={confirmPassword} onChangeText={setConfirmPassword} placeholder="Confirm your new password" style={styles.input} />
+
+            <TouchableOpacity onPress={updateUserData} style={styles.buttonPrimary}>
+              <Text style={styles.buttonText}>{loading ? "Updating..." : "Update User Data"}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={updatePasswordHandler} style={styles.buttonSecondary}>
+              <Text style={styles.buttonText}>{isPasswordUpdating ? "Updating..." : "Update Password"}</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity onPress={deleteAllPosts} style={styles.buttonDanger}>
+              <Text style={styles.buttonText}>Delete All Posts</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={deleteAccount} style={styles.buttonDanger}>
+              <Text style={styles.buttonText}>Delete Account</Text>
+            </TouchableOpacity>
+          </>
+        )}
+        <TouchableOpacity onPress={() => setLogOutModalVisible(true)} style={styles.buttonSecondary}>
+          <Text style={styles.buttonText}>Log Out</Text>
+        </TouchableOpacity>
+      </View>
+
+      <Modal
+        visible={isDeletePostsModalVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setDeletePostsModalVisible(false)}
+      >
+        <View style={styles.modalBackground}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalText}>Are you sure you want to delete all your posts?</Text>
+            <TouchableOpacity onPress={confirmDeleteAllPosts} style={styles.modalButton}>
+              <Text style={styles.modalButtonText}>Yes, Delete</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => setDeletePostsModalVisible(false)} style={styles.modalButton}>
+              <Text style={styles.modalButtonText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
+        visible={isDeleteAccountModalVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setDeleteAccountModalVisible(false)}
+      >
+        <View style={styles.modalBackground}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalText}>Are you sure you want to delete your account?</Text>
+            <TouchableOpacity onPress={confirmDeleteAccount} style={styles.modalButton}>
+              <Text style={styles.modalButtonText}>Yes, Delete Account</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => setDeleteAccountModalVisible(false)} style={styles.modalButton}>
+              <Text style={styles.modalButtonText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+      <Modal
+  visible={isLogOutModalVisible}
+  transparent={true}
+  animationType="fade"
+  onRequestClose={() => setLogOutModalVisible(false)}
+>
+  <View style={styles.modalBackground}>
+    <View style={styles.modalContainer}>
+      <Text style={styles.modalText}>Are you sure you want to log out?</Text>
+      <TouchableOpacity onPress={onLogOut} style={styles.modalButton}>
+        <Text style={styles.modalButtonText}>Yes, Log Out</Text>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={() => setLogOutModalVisible(false)} style={styles.modalButton}>
+        <Text style={styles.modalButtonText}>Cancel</Text>
+      </TouchableOpacity>
+    </View>
+  </View>
+</Modal>
+
+    <View style={{ height: 80}} />
     </ScrollView>
   );
 }
 
+const screenHeight = Dimensions.get('window').height;
+
 const styles = StyleSheet.create({
+  scrollContent: {
+    height: screenHeight,
+    backgroundColor: "#e0e0e2",
+    paddingBottom: 30,
+  },
+  bottomSpace: {
+    height: 80, 
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 15,
+    backgroundColor: "#d6d6d8",
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginLeft: 10,
+    color: "#372554",
+  },
   container: {
-    flex: 1,
     padding: 20,
+  },
+  label: {
+    fontWeight: "bold",
+    marginBottom: 5,
+    color: "#372554",
   },
   input: {
-    width: "100%",
-    padding: 10,
-    borderColor: "#ccc",
+    backgroundColor: "#fff",
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 15,
     borderWidth: 1,
-    marginBottom: 20,
-    borderRadius: 5,
+    borderColor: "#ccc",
   },
-  modalOverlay: {
-    flex: 1,
-    justifyContent: "center",
+  buttonPrimary: {
+    backgroundColor: "#416788",
+    padding: 12,
+    borderRadius: 8,
     alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.5)",
-  },
-  modalContainer: {
-    width: "80%",
-    padding: 20,
-    backgroundColor: "white",
-    borderRadius: 10,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
     marginBottom: 10,
   },
-  modalText: {
-    fontSize: 16,
-    marginBottom: 20,
+  buttonSecondary: {
+    backgroundColor: "#946e83",
+    padding: 12,
+    borderRadius: 8,
+    alignItems: "center",
+    marginBottom: 10,
   },
-  modalButtons: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  cancelButton: {
-    backgroundColor: "#aaa",
-    padding: 10,
-    borderRadius: 5,
-  },
-  deleteButton: {
-    backgroundColor: "red",
-    padding: 10,
-    borderRadius: 5,
+  buttonDanger: {
+    backgroundColor: "#7e1946",
+    padding: 12,
+    borderRadius: 8,
+    alignItems: "center",
+    marginBottom: 10,
   },
   buttonText: {
     color: "white",
+    fontWeight: "bold",
+  },
+  
+  modalBackground: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContainer: {
+    backgroundColor: "#fff",
+    padding: 20,
+    borderRadius: 12,
+    width: "80%",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalText: {
+    fontSize: 18,
+    marginBottom: 15,
+    textAlign: "center",
+    color: "#372554",
+  },
+  modalButton: {
+    backgroundColor: "#416788",
+    padding: 12,
+    borderRadius: 8,
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  modalButtonText: {
+    color: "white",
+    fontWeight: "bold",
   },
 });

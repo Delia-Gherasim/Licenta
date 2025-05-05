@@ -7,20 +7,34 @@ import {
   Image,
   ScrollView,
   Alert,
+  Dimensions,
+  TouchableOpacity,
+  useWindowDimensions,
 } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import AuthObserver from "../../utils/AuthObserver";
-
+import PostDetails from "../Post/PostComponent/PostDetails";
+import { Ionicons } from '@expo/vector-icons';
+import Constants from 'expo-constants';
+const API_URL = Constants.manifest.extra.API_URL_DATA;
 const AnotherProfile = () => {
   const [userData, setUserData] = useState(null);
   const [posts, setPosts] = useState([]);
   const [isFollowing, setIsFollowing] = useState(false);
   const [currentUserId, setCurrentUserId] = useState(null);
   const [isGuest, setIsGuest] = useState(false);
-
+  const [selectedPostDetails, setSelectedPostDetails] = useState(null);
+  const [numColumns, setNumColumns] = useState(2);
   const navigation = useNavigation();
   const route = useRoute();
   const { userId } = route.params || {};
+  const { width: screenWidth } = useWindowDimensions();
+
+  useEffect(() => {
+    if (screenWidth < 500) setNumColumns(2);
+    else if (screenWidth < 800) setNumColumns(3);
+    else setNumColumns(4);
+  }, [screenWidth]);
 
   useEffect(() => {
     const fetchCurrentUser = async () => {
@@ -39,41 +53,39 @@ const AnotherProfile = () => {
         setIsGuest(true);
       }
     };
-
     fetchCurrentUser();
   }, [userId]);
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const res = await fetch(`http://localhost:8000/data/users/${userId}`);
+        const res = await fetch(`${API_URL}/users/${userId}`);
         if (!res.ok) throw new Error("Server error");
-
         const json = await res.json();
         setUserData(json);
-
         if (currentUserId) {
           setIsFollowing(json.followers.includes(currentUserId));
         }
       } catch (err) {
-        console.warn("Error fetching user data:", err);
         Alert.alert("Error", "Failed to load user profile.");
       }
     };
 
     const fetchUserPosts = async () => {
       try {
-        const res = await fetch(`http://localhost:8000/data/posts/all/${userId}`);
+        const res = await fetch(`${API_URL}/posts/all/${userId}`);
         if (!res.ok) throw new Error("Server error");
         const json = await res.json();
         setPosts(json.posts || []);
       } catch (err) {
-        console.warn("Error fetching posts:", err);
+        Alert.alert("Error", "Failed to load user posts.");
       }
     };
 
-    fetchUserData();
-    fetchUserPosts();
+    if (userId) {
+      fetchUserData();
+      fetchUserPosts();
+    }
   }, [userId, currentUserId]);
 
   const handleFollow = async () => {
@@ -84,8 +96,7 @@ const AnotherProfile = () => {
 
     try {
       const action = isFollowing ? "unfollow" : "follow";
-      const url = `http://localhost:8000/data/users/${currentUserId}/${action}/${userId}`;
-
+      const url = `${API_URL}/users/${currentUserId}/${action}/${userId}`;
       const res = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -94,72 +105,178 @@ const AnotherProfile = () => {
       if (!res.ok) throw new Error("Request failed");
 
       setIsFollowing(!isFollowing);
-      Alert.alert(
-        isFollowing ? "Unfollowed" : "Followed",
-        `${isFollowing ? "Unfollowed" : "Followed"} ${userData?.name}`
-      );
-      const updatedRes = await fetch(`http://localhost:8000/data/users/${userId}`);
+
+      const updatedRes = await fetch(`${API_URL}/users/${userId}`);
       const updatedData = await updatedRes.json();
       setUserData(updatedData);
     } catch (err) {
-      console.warn("Follow/unfollow error:", err);
       Alert.alert("Error", "Failed to update follow status.");
     }
+  };
+
+  const openPostDetails = (post) => {
+    setSelectedPostDetails(post);
   };
 
   if (!userData) return <Text style={styles.loading}>Loading...</Text>;
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.profileBox}>
-        <Text style={styles.name}>{userData.name}</Text>
-        <Text style={styles.bio}>{userData.bio}</Text>
-        <Text style={styles.followers}>Followers: {userData.followers.length}</Text>
-        <Text style={styles.following}>Following: {userData.following.length}</Text>
+    <View style={styles.viewOf}>
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        <View style={[styles.mainContentContainer, screenWidth >= 800 ? styles.rowLayout : null]}>
+          <View style={styles.leftContent}>
+            <View style={[styles.profileHeader, { width: screenWidth < 600 ? "100%" : 600 }]}>
+              <View style={styles.headerContainer}>
+                <View style={styles.settingsIconContainer}>
+                  <TouchableOpacity onPress={() => navigation.goBack()}>
+                    <Ionicons name="arrow-back" size={24} color="#333" />
+                  </TouchableOpacity>
+                </View>
+              </View>
 
-        {!isGuest && currentUserId !== userId && (
-          <Button
-            title={isFollowing ? "Unfollow" : "Follow"}
-            onPress={handleFollow}
-          />
-        )}
-      </View>
+              <View style={styles.profileRow}>
+                <Text style={styles.name}>{userData.name}</Text>
+              </View>
+              <View style={styles.profileRow}>
+                <Text style={styles.bio}>{userData.bio}</Text>
+              </View>
 
-      <View style={styles.postsContainer}>
-        {posts.length > 0 ? (
-          posts.map((post) => (
-            <View key={post.postId} style={styles.post}>
-              <Image source={{ uri: post.url }} style={styles.postImage} />
-              <Text>{post.caption}</Text>
+              <View style={styles.profileRow}>
+                <View style={styles.ratingRow}>
+                  <Ionicons name="star" size={16} color="#f4c542" style={{ marginRight: 4 }} />
+                  <Text style={styles.rating}>Posts Rating: {userData.postRating || "0"}</Text>
+                </View>
+              </View>
+
+              <View style={styles.followRow}>
+                <Text>Followers: {userData.followers.length}</Text>
+                <Text>Following: {userData.following.length}</Text>
+              </View>
+
+              {!isGuest && currentUserId !== userId && (
+                <View style={styles.followButton}>
+                  <Button
+                    title={isFollowing ? "Unfollow" : "Follow"}
+                    onPress={handleFollow}
+                    color="#416788"
+                  />
+                </View>
+              )}
             </View>
-          ))
-        ) : (
-          <Text style={{ textAlign: "center", marginTop: 20 }}>No posts yet.</Text>
-        )}
-      </View>
-    </ScrollView>
+
+            <View style={styles.masonryContainer}>
+              {Array.from({ length: numColumns }).map((_, colIndex) => (
+                <View style={styles.masonryColumn} key={`col-${colIndex}`}>
+                  {posts
+                    .filter((_, idx) => idx % numColumns === colIndex)
+                    .map((post) => (
+                      <TouchableOpacity
+                        key={post.postId}
+                        onPress={() => openPostDetails(post)}
+                        activeOpacity={0.8}
+                        style={{ marginBottom: 8 }}
+                      >
+                        <Image
+                          source={{ uri: post.url }}
+                          style={{
+                            width: "100%",
+                            aspectRatio: post.aspectRatio || 1,
+                            borderRadius: 8,
+                            backgroundColor: "#ccc",
+                          }}
+                          resizeMode="cover"
+                        />
+                      </TouchableOpacity>
+                    ))}
+                </View>
+              ))}
+            </View>
+
+            {screenWidth < 800 && selectedPostDetails && (
+              <View style={styles.postDetailsContainer}>
+                <PostDetails
+                  post={selectedPostDetails}
+                  userId={userId}
+                  onPostDeleted={() => setSelectedPostDetails(null)}
+                />
+              </View>
+            )}
+          </View>
+
+          {screenWidth >= 800 && selectedPostDetails && (
+            <View style={styles.rightSidebar}>
+              <PostDetails
+                post={selectedPostDetails}
+                userId={userId}
+                onPostDeleted={() => setSelectedPostDetails(null)}
+              />
+            </View>
+          )}
+        </View>
+        <View style={styles.bottomSpace} />
+      </ScrollView>
+    </View>
   );
 };
 
+const screenHeight = Dimensions.get("window").height;
 const styles = StyleSheet.create({
-  container: {
-    padding: 16,
-    backgroundColor: "#f8f9fa",
+  viewOf: {
+    height: screenHeight,
+    backgroundColor: "#e0e0e2",
   },
-  profileBox: {
+  scrollContent: {
+    padding: 16,
+    alignItems: "center",
+    flexGrow: 1,
+  },
+  bottomSpace: {
+    height: 80,
+  },
+  mainContentContainer: {
+    width: "100%",
+    flexGrow: 1,
+  },
+  rowLayout: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  leftContent: {
+    flex: 1,
+  },
+  rightSidebar: {
+    flex: 1,
+    paddingLeft: 16,
+    minWidth: 400,
+  },
+  loading: {
+    marginTop: 50,
+    textAlign: "center",
+    fontSize: 16,
+  },
+  profileHeader: {
+    marginBottom: 16,
     backgroundColor: "#fff",
     padding: 16,
     borderRadius: 12,
-    marginBottom: 16,
     elevation: 2,
-    alignItems: "center",
+    alignSelf: "flex-start",
+    position: "relative",
   },
-  profileImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    marginBottom: 10,
-    backgroundColor: "#ddd",
+  headerContainer: {
+    position: "relative",
+    width: "100%",
+  },
+  settingsIconContainer: {
+    position: "absolute",
+    top: 10,
+    right: 10,
+    zIndex: 1,
+  },
+  profileRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 6,
   },
   name: {
     fontSize: 20,
@@ -170,30 +287,40 @@ const styles = StyleSheet.create({
     fontStyle: "italic",
     marginTop: 6,
   },
-  followers: {
-    fontSize: 16,
-    marginTop: 8,
+  ratingRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 5,
   },
-  following: {
-    fontSize: 16,
-    marginTop: 4,
+  rating: {
+    fontSize: 14,
+    color: "#666",
   },
-  postsContainer: {
-    marginTop: 20,
+  followRow: {
+    flexDirection: "row",
+    justifyContent: "space-evenly",
+    marginTop: 10,
   },
-  post: {
-    marginBottom: 10,
+  followButton: {
+    marginTop: 10,
   },
-  postImage: {
+  masonryContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
     width: "100%",
-    height: 200,
-    borderRadius: 10,
-    resizeMode: "cover",
+    alignSelf: "center",
+    marginTop: 16,
+    paddingHorizontal: 4,
   },
-  loading: {
-    textAlign: "center",
-    fontSize: 18,
-    marginTop: 50,
+  masonryColumn: {
+    flex: 1,
+    marginHorizontal: 4,
+  },
+  postDetailsContainer: {
+    borderColor: "#ccc",
+    width: "100%",
+    maxWidth: 600,
+    alignSelf: "center",
   },
 });
 

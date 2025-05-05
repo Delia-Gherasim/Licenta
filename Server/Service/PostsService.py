@@ -157,6 +157,7 @@ class PostsService:
     async def delete_post(self, user_id: str, post_id: str):
         if not await self._validate_user(user_id) or not await self._validate_post(post_id):
             return {"error": "Invalid user or post ID"}
+        
         post_data = await self.repo.get_single_post(post_id)
         post_rating = post_data.get('rating', 0)
 
@@ -168,9 +169,14 @@ class PostsService:
         ]
         
         await asyncio.gather(*tasks)
+        
+        # Check if user has remaining posts
         remaining_posts = await self.repo.get_user_posts_from_firestore(user_id)
         if not remaining_posts.get('posts'):  
+            # Set user's rating to 0 if no posts exist
             await self.user_repo.update_user_rating(user_id, 0)
+        
+        # Update the user's rating based on the remaining posts' ratings
         newUserRating = await self.repo.get_user_average_rating(post_data.get('userId'))
         await self.user_repo.update_user_rating(post_data.get('userId'), newUserRating)
 
@@ -183,11 +189,14 @@ class PostsService:
         posts = await self.retry(self.repo.get_user_posts_from_firestore, user_id)
         if "posts" not in posts:
             return {"error": "No posts found"}
+        
         posts_list = posts["posts"]
         tasks = [self.delete_post(user_id, post["postId"]) for post in posts_list]
         await asyncio.gather(*tasks)
 
-        self.user_repo.update_user_rating(user_id, 0)
+        remaining_posts = await self.repo.get_user_posts_from_firestore(user_id)
+        if not remaining_posts.get('posts'):  
+            # Set user's rating to 0 if no posts exist
+            await self.user_repo.update_user_rating(user_id, 0)
+        
         return {"message": "All posts deleted"}
-    
-    

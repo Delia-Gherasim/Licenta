@@ -8,6 +8,13 @@ import useOfflinePostSync from "../../utils/OfflinePost";
 import { uploadToCloudinary } from "../../utils/CloudinaryConfig";  
 import AuthObserver from "../../utils/AuthObserver";
 import { emitPostAdded } from "../../utils/PostEvent";
+import { Dimensions } from 'react-native';
+import { Platform } from 'react-native';
+import Constants from 'expo-constants';
+const API_URL = Constants.manifest.extra.API_URL_DATA;
+const { width, height } = Dimensions.get('window');
+
+const isPortrait = height > width;
 
 export default function Publish({ route }) {
   const { imageUri } = route.params;
@@ -82,7 +89,7 @@ export default function Publish({ route }) {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 20000);
 
-        response = await fetch("http://localhost:8000/data/posts", {
+        response = await fetch(API_URL+"/posts", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(postPayload), 
@@ -136,7 +143,7 @@ export default function Publish({ route }) {
                 hashtags: post.hashtags || [],
               };
 
-              const response = await fetch("http://localhost:8000/data/posts", {
+              const response = await fetch(API_URL+"/posts", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload),
@@ -166,7 +173,7 @@ export default function Publish({ route }) {
   if (uploading) {
     return (
       <View style={styles.centered}>
-        <Image source={require("../../utils/Animation - 1745528060831.gif")} />
+        <Image source={require("../../assets/Animation - 1745528060831.gif")} />
         <Text style={{ marginTop: 20 }}>Uploading your post...</Text>
       </View>
     );
@@ -187,8 +194,8 @@ export default function Publish({ route }) {
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.scrollContent} bounces={false}>
-      <View style={styles.fixedContainer}>
+    <ScrollView contentContainerStyle={styles.scrollContent} bounces={false} keyboardShouldPersistTaps="handled">
+      <View style={styles.viewContainer}>
         <Image source={{ uri: imageUri }} style={styles.image} />
         <TextInput
           placeholder="Write a Caption"
@@ -211,11 +218,9 @@ export default function Publish({ route }) {
     </ScrollView>
   );
 }
-
-
 const styles = StyleSheet.create({
   errorText: {
-    color: "red",
+    color: "#7E1946",
     marginBottom: 15,
     textAlign: "center",
   },
@@ -223,62 +228,82 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#fff",
-    paddingVertical: 40,
+    backgroundColor: "#E0E0E2",
+    paddingVertical: 30,
+    paddingHorizontal: 20,
   },
-  fixedContainer: {
-    width: 520,
+  viewContainer: {
     alignItems: "center",
-  },
-  saveButton: {
-    backgroundColor: "#2196F3",
-    paddingVertical: 12,
-    paddingHorizontal: 30,
-    borderRadius: 8,
-  },
-  saveButtonText: {
-    color: "#fff",
-    fontWeight: "bold",
-  },
-  container: {
-    flex: 1,
-    paddingTop: 80,
-    alignItems: "center",
+    width: "100%",
+    maxWidth: 500,
   },
   centered: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
     padding: 20,
+    backgroundColor: "#E0E0E2",
   },
   image: {
-    width: 500,
-    height: 375,
+    width: "100%",
+    height: undefined,
+    aspectRatio: 4 / 3,
+    borderRadius: 15,
     marginBottom: 20,
+    borderWidth: 2,
+    borderColor: "#946E83",
+    resizeMode: "cover",
   },
   input: {
-    width: "80%",
-    padding: 10,
+    width: "100%",
+    padding: 14,
     borderColor: "#ccc",
     borderWidth: 1,
     marginBottom: 20,
-    borderRadius: 5,
+    borderRadius: 10,
+    fontSize: 16,
+    backgroundColor: "#E0E0E2",
+  },
+  saveButton: {
+    backgroundColor: "#946E83",
+    paddingVertical: 14,
+    paddingHorizontal: 30,
+    borderRadius: 10,
+    width: "100%",
+    alignItems: "center",
+    marginTop: 10,
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+  },
+  saveButtonText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 18,
   },
   successText: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: "bold",
+    color: "#533880",
     marginBottom: 30,
+    textAlign: "center",
   },
   navButton: {
-    backgroundColor: "#4CAF50",
-    padding: 15,
+    backgroundColor: "#7389AE",
+    paddingVertical: 14,
     marginVertical: 10,
     borderRadius: 10,
     width: "70%",
     alignItems: "center",
+    shadowColor: "#000",
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
   },
   buttonText: {
-    color: "white",
+    color: "#fff",
     fontWeight: "600",
+    fontSize: 16,
   },
 });

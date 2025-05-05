@@ -7,6 +7,10 @@ import {
   Button,
   StyleSheet,
 } from "react-native";
+import Toast from 'react-native-toast-message';
+import { emitPostChange } from "../../../utils/PostEvent";
+import Constants from 'expo-constants';
+const API_URL = Constants.manifest.extra.API_URL_DATA;
 
 const extractHashtags = (caption) => {
   const matches = caption.match(/#\w+/g);
@@ -39,35 +43,60 @@ export default function PostSettingsModal({
     };
   
     try {
-      const res = await fetch(`http://localhost:8000/data/posts/${post.postId}`, {
+      const res = await fetch(`${API_URL}/posts/${post.postId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
   
       if (!res.ok) throw new Error("Failed to update post");
-      setSuccessMessage("Post updated successfully!");
+
+      Toast.show({
+        type: 'success',
+        text1: 'Post Updated',
+        text2: 'Your post has been successfully updated.',
+      });
+
       onPostUpdated?.();
+      emitPostChange();
       onClose();
     } catch (err) {
       const errorMessage = err.message || JSON.stringify(err); 
       setErrorMessage(errorMessage);
+
+      Toast.show({
+        type: 'error',
+        text1: 'Update Failed',
+        text2: errorMessage,
+      });
     }
   };
   
   const handleDelete = async () => {
     try {
       const res = await fetch(
-        `http://localhost:8000/data/posts/${post.postId}/${currentUserId}`,
+        `${API_URL}/posts/${post.postId}/${currentUserId}`,
         { method: "DELETE" }
       );
       if (!res.ok) throw new Error("Failed to delete post");
-      setSuccessMessage("Your post has been removed.");
+
+      Toast.show({
+        type: 'success',
+        text1: 'Post Deleted',
+        text2: 'Your post has been successfully removed.',
+      });
+
       onPostDeleted?.();
+      emitPostChange();
       onClose();
     } catch (err) {
       const errorMessage = err.message || JSON.stringify(err); 
       setErrorMessage(errorMessage);
+      Toast.show({
+        type: 'error',
+        text1: 'Delete Failed',
+        text2: errorMessage,
+      });
     }
   };
 
@@ -92,40 +121,6 @@ export default function PostSettingsModal({
           </View>
         </View>
       </View>
-
-      {/* Success Message Modal */}
-      {successMessage && (
-        <Modal
-          visible={!!successMessage}
-          animationType="fade"
-          transparent
-          onRequestClose={() => setSuccessMessage(null)}
-        >
-          <View style={styles.modalContainer}>
-            <View style={styles.messageModal}>
-              <Text>{successMessage}</Text>
-              <Button title="OK" onPress={() => setSuccessMessage(null)} />
-            </View>
-          </View>
-        </Modal>
-      )}
-
-      {/* Error Message Modal */}
-      {errorMessage && (
-        <Modal
-          visible={!!errorMessage}
-          animationType="fade"
-          transparent
-          onRequestClose={() => setErrorMessage(null)}
-        >
-          <View style={styles.modalContainer}>
-            <View style={styles.messageModal}>
-              <Text style={styles.errorText}>{errorMessage}</Text>
-              <Button title="OK" onPress={() => setErrorMessage(null)} />
-            </View>
-          </View>
-        </Modal>
-      )}
     </Modal>
   );
 }
@@ -142,13 +137,6 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 10,
     width: "80%",
-  },
-  messageModal: {
-    backgroundColor: "white",
-    padding: 20,
-    borderRadius: 10,
-    width: "80%",
-    alignItems: "center",
   },
   input: {
     borderColor: "#ccc",
@@ -171,8 +159,5 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     fontSize: 16,
   },
-  errorText: {
-    color: "red",
-    marginBottom: 10,
-  },
 });
+

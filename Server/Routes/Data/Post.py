@@ -76,9 +76,9 @@ async def get_user_by_post(postId: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     
-# @router.delete("/user/{userId}/delete")
-# async def delete_all_user_posts(userId: str):
-#     try:
-#         return await post_service.delete_all_posts_of_user(userId)
-#     except Exception as e:
-#         raise HTTPException(status_code=500, detail=str(e))
+@router.delete("/user/{userId}/delete")
+async def delete_all_user_posts(userId: str):
+    try:
+        return await post_service.delete_all_posts_of_user(userId)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

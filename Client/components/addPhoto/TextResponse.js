@@ -1,9 +1,10 @@
 import React from 'react';
 import { Text } from 'react-native';
-
+import Constants from 'expo-constants';
+const API_URL_CHATBOT = Constants.manifest.extra.API_URL_CHATBOT;
 export default class TextResponse {
   static async process(formData) {
-    const API_URL = "http://localhost:8000/chatbot/advice";
+    const API_URL = API_URL_CHATBOT+"/advice";
 
     try {
       const res = await fetch(API_URL, {
@@ -48,7 +49,6 @@ export default class TextResponse {
           </Text>
         ));
       } else  {
-        // Handle the technical quality advice
         const result = data.result || "No result.";
         const lines = result.split("\n").filter(Boolean);
         return lines.map((line, i) => (
@@ -57,8 +57,6 @@ export default class TextResponse {
           </Text>
         ));
       }
-
-      return "No aesthetic score found in response.";
     } catch (error) {
       console.error("Error in AestheticStrategy:", error);
       return "An error occurred while processing the request.";

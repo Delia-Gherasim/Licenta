@@ -2,7 +2,8 @@ from pydantic import BaseModel
 
 class VoteRequest(BaseModel):
     commentId: str
-    vote: bool  
+    userId: str
+    vote: bool
 
 class VoteDeleteRequest(BaseModel):
     commentId: str

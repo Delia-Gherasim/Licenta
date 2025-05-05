@@ -2,6 +2,20 @@
   "expo": {
     "name": "socialMediaServices",
     "slug": "socialMediaServices",
+    "extra" : {
+      "API_URL_DATA": "http://localhost:8000/data",
+      "API_URL_CHATBOT":"http://localhost:8000/chatbot",
+      "POST_STORAGE_KEY": "cachedPosts",
+      "CLOUDINARY_URL" : "https://api.cloudinary.com/v1_1/df2iifqrf/image/upload",
+      "CLOUDINARY_PRESET" :"ml_default",
+      "FIREBASE_API_KEY": "AIzaSyCUBmFQPFFsZGZtcBYnRjTJLpg2k4MEl1Q",
+      "FIREBASE_AUTH_DOMAIN": "photoadvice-3724b.firebaseapp.com",
+      "FIREBASE_PROJECT_ID": "photoadvice-3724b",
+      "FIREBASE_STORAGE_BUCKET": "photoadvice-3724b.appspot.com",
+      "FIREBASE_MESSAGING_SENDER_ID": "398427724040",
+      "FIREBASE_APP_ID": "1:398427724040:web:b827a2506f7ed5c633b4bd",
+      "FIREBASE_MEASUREMENT_ID": "G-2CZBLCMB26"
+    },
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",

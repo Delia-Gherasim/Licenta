@@ -22,10 +22,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   modalContent: {
-    width: "80%",
+    width: "90%",
     height: "80%",
     backgroundColor: "#fff",
     borderRadius: 12,
     padding: 10,
-  },
+    overflow: "hidden", 
+  }
 });

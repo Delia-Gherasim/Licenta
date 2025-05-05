@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { View, Text } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
+import Toast from 'react-native-toast-message';
 
 import { getApps, initializeApp } from "firebase/app";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
@@ -11,6 +12,7 @@ import Register from "./components/auth/Register";
 import Login from "./components/auth/Login";
 import Main from "./components/Main";
 import AuthObserver from "./utils/AuthObserver";
+import { NotificationProvider } from "./NotificationContext";
 
 
 const Stack = createStackNavigator();
@@ -44,7 +46,12 @@ export class App extends Component {
     if (!loaded) {
       return (
         <View
-          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: "#E0E0E2",
+        }}
         >
           <Text>Loading...</Text>
         </View>
@@ -52,6 +59,8 @@ export class App extends Component {
     }
 
     return (
+      <>
+      <NotificationProvider>
       <NavigationContainer>
         <Stack.Navigator initialRouteName={loggedIn ? "Main" : "Landing"}>
           {!loggedIn ? (
@@ -61,10 +70,13 @@ export class App extends Component {
               <Stack.Screen name="Login" component={Login} />
             </>
           ) : (
-            <Stack.Screen name="Main" component={Main} options={{ headerShown: false }}/>
+            <Stack.Screen name="Main" component={Main} options={{ headerShown: false }} style={{ flex: 1 }}/>
           )}
         </Stack.Navigator>
       </NavigationContainer>
+      <Toast />
+      </NotificationProvider>
+      </>
     );
   }
 }

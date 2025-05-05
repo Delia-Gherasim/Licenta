@@ -17,6 +17,7 @@ class VotesService:
         self.votes_repo = VotesRepository(cred_path)
         self.comments_repo = CommentsRepository(cred_path)
         self.users_repo = UsersRepository(cred_path)
+        self.posts_repo = PostsRepository(cred_path)
 
     async def retry(self, func: Callable, *args, retries: int = 3, delay: float = 1.0, **kwargs) -> Any:
         for attempt in range(1, retries + 1):
@@ -85,7 +86,7 @@ class VotesService:
 
         logger.info(f"User {user_id} voting on comment {comment_id} with vote: {vote}")
         await self.retry(self.votes_repo.upload_or_update_vote, comment_id, user_id, vote)
-
+        await self.retry(self.comments_repo.update_comment_votes, comment_id, vote)
         # Get the total votes for the comment and update the comment and user ratings concurrently
         total_votes, comment = await asyncio.gather(
             self.retry(self.votes_repo.get_comment_total_votes, comment_id),
@@ -107,8 +108,10 @@ class VotesService:
 
         logger.info(f"Removing vote of user {user_id} for comment {comment_id}")
         # Remove vote operation
+        previous_vote = await self.retry(self.votes_repo.get_user_vote, comment_id, user_id)
         await self.retry(self.votes_repo.delete_vote, comment_id, user_id)
-
+        if previous_vote is not None:
+            await self.retry(self.comments_repo.update_comment_votes, comment_id, not previous_vote)
         # Get the total votes for the comment and update the comment and user ratings concurrently
         total_votes, comment = await asyncio.gather(
             self.retry(self.votes_repo.get_comment_total_votes, comment_id),
@@ -124,10 +127,9 @@ class VotesService:
         # Calculate the total likes for the user (comments + posts)
         user_comments = await self.comments_repo.get_user_comments(user_id)
         total_likes = sum(comment.get("likes", 0) for comment in user_comments)
-        
-        user_posts = await self.posts_repo.get_user_posts_from_firestore(user_id)
+        user_posts_data = await self.posts_repo.get_user_posts_from_firestore(user_id)
+        user_posts = user_posts_data.get("posts", [])
         total_likes += sum(post.get("likes", 0) for post in user_posts)
-
         # Update total likes for the user in the user repository
         await self.users_repo.update_user_likes(user_id, total_likes)
 

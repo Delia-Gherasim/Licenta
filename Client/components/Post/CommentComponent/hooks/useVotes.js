@@ -1,13 +1,13 @@
 import { useState } from "react";
-
-const API_URL = "http://localhost:8000";
+import Constants from 'expo-constants';
+const API_URL = Constants.manifest.extra.API_URL_DATA;
 
 export default function useVotes() {
   const [votes, setVotes] = useState({});
 
   const fetchVoteTotal = async (commentId) => {
     try {
-      const res = await fetch(`${API_URL}/data/votes/${commentId}/total`);
+      const res = await fetch(`${API_URL}/votes/${commentId}/total`);
       const data = await res.json();
       setVotes((prev) => ({ ...prev, [commentId]: data.total }));
     } catch (err) {

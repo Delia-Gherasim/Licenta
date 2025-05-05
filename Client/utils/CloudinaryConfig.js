@@ -1,7 +1,7 @@
 import { Platform } from "react-native";
-
-const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/df2iifqrf/image/upload";
-const UPLOAD_PRESET = "ml_default";
+import Constants from 'expo-constants';
+const CLOUDINARY_URL = Constants.manifest.extra.CLOUDINARY_URL;
+const UPLOAD_PRESET = Constants.manifest.extra.CLOUDINARY_PRESET;
 
 export const uploadToCloudinary = async (imageUri) => {
   const data = new FormData();

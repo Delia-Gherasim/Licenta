@@ -1,6 +1,6 @@
 import { useState } from "react";
-
-const API_URL = "http://localhost:8000";
+import Constants from 'expo-constants';
+const API_URL = Constants.manifest.extra.API_URL_DATA;
 
 export default function useReplies(postId) {
   const [repliesMap, setRepliesMap] = useState({});
@@ -8,7 +8,7 @@ export default function useReplies(postId) {
   const fetchReplies = async (parentCommentId) => {
     try {
       const res = await fetch(
-        `${API_URL}/data/comments/post/${postId}/comment/${parentCommentId}`
+        `${API_URL}/comments/post/${postId}/comment/${parentCommentId}`
       );
       const data = await res.json();
       setRepliesMap((prev) => ({

@@ -91,6 +91,14 @@ class UsersRepository:
         else:
             return {"error": "User not found"}
 
+    async def update_user_likes(self, uId: str, total_likes: int):
+        user_doc = await self._get_user_doc(uId)
+        if user_doc.exists:
+            await run_in_threadpool(user_doc.reference.update, {"likes": total_likes})
+            return {"message": "User total likes updated"}
+        else:
+            return {"error": "User not found"}
+
     async def get_user_by_id(self, uId: str):
         user_doc = await self._get_user_doc(uId)
         if user_doc.exists:

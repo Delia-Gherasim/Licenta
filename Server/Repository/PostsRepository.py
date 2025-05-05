@@ -201,7 +201,7 @@ class PostsRepository:
                     logger.warning(f"Invalid rating value in post: {rating}")
             
             if total_posts == 0:
-                return {"error": "User has no posts"}  
+                return 0
 
             average_rating = total_rating / total_posts
             return average_rating  

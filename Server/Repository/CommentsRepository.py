@@ -123,19 +123,18 @@ class CommentsRepository:
         return {"commentId": commentId, "likes": comment.to_dict().get("likes", 0)}
 
     async def update_comment_votes(self, commentId: str, vote: bool):
-        def update_in_transaction(transaction: Transaction):
+        def update_votes():
             ref = self.comments_collection.document(commentId)
-            snapshot = ref.get(transaction=transaction)
+            snapshot = ref.get()
             if not snapshot.exists:
                 raise ValueError("Comment not found")
-
             current_likes = snapshot.to_dict().get("likes", 0)
             new_likes = current_likes + (1 if vote else -1)
-            transaction.update(ref, {"likes": new_likes})
+            ref.update({"likes": new_likes})
             return new_likes
 
         try:
-            new_likes = await run_in_threadpool(lambda: self.db.run_transaction(update_in_transaction))
+            new_likes = await run_in_threadpool(update_votes)
             return {"message": "Comment votes updated", "likes": new_likes}
         except ValueError as e:
             return {"error": str(e)}

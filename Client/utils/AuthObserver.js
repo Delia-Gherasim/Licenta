@@ -6,9 +6,18 @@ import {
   createUserWithEmailAndPassword,
   signOut,
 } from "firebase/auth";
+import {
+  EmailAuthProvider,
+  reauthenticateWithCredential,
+  updatePassword as firebaseUpdatePassword,
+  updateEmail as firebaseUpdateEmail,
+} from "firebase/auth";
 import { getFirestore, setDoc, doc } from "firebase/firestore";
-
+import Constants from 'expo-constants';
+const API_URL = Constants.manifest.extra.API_URL_DATA;
 const USER_ID_KEY = "currentUserId";
+const POST_STORAGE_KEY = "cachedPosts";
+
 
 class AuthObserver {
   constructor() {
@@ -18,6 +27,7 @@ class AuthObserver {
   }
 
   init() {
+    
     this.unsubscribeFn = onAuthStateChanged(auth, async (user) => {
       this.user = user;
       if (user?.uid) {
@@ -28,7 +38,28 @@ class AuthObserver {
       this.notify(user);
     });
   }
-
+  async fetchUserProfile(userId) {
+    try {
+      const res = await fetch(`${API_URL}/users/${userId}`);
+      if (!res.ok) throw new Error("Server error fetching user profile");
+      const json = await res.json();
+      return json; 
+    } catch (error) {
+      console.warn("Error fetching profile:", error);
+      return null;
+    }
+  }
+  async fetchUserName(userId) {
+    try {
+      const res = await fetch(`${API_URL}/users/${userId}`);
+      if (!res.ok) throw new Error("Server error fetching user profile");
+      const json = await res.json();
+      return json.name; 
+    } catch (error) {
+      console.warn("Error fetching profile:", error);
+      return null;
+    }
+  }
   subscribe(callback) {
     this.subscribers.push(callback);
     if (this.user !== null) callback(this.user);
@@ -76,12 +107,12 @@ class AuthObserver {
     } else {
       console.log("No such document!");
     }
-
+    const userProfile = await this.fetchUserProfile(user.uid);
     return userCredential;
   }
 
   async logout() {
-    await AsyncStorage.removeItem(USER_ID_KEY); 
+    await AsyncStorage.clear();
     return signOut(auth);
   }
 
@@ -92,6 +123,27 @@ class AuthObserver {
   async getCurrentUserId() {
     if (this.user?.uid) return this.user.uid;
     return await AsyncStorage.getItem(USER_ID_KEY); 
+  }
+  async reauthenticate(currentPassword) {
+    const user = this.getCurrentUser();
+    if (!user || !currentPassword) {
+      throw new Error("Missing user or password");
+    }
+    const credential = EmailAuthProvider.credential(user.email, currentPassword);
+    return await reauthenticateWithCredential(user, credential);
+  }
+
+  async updatePassword(newPassword, currentPassword) {
+    const user = this.getCurrentUser();
+    if (!user) throw new Error("No user signed in");
+    await this.reauthenticate(currentPassword);
+    return await firebaseUpdatePassword(user, newPassword);
+  }
+
+  async updateEmail(newEmail) {
+    const user = this.getCurrentUser();
+    if (!user) throw new Error("No user signed in");
+    return await firebaseUpdateEmail(user, newEmail);
   }
 
   cleanup() {

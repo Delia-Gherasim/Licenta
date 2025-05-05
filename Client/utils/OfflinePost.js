@@ -3,7 +3,8 @@ import { useEffect } from "react";
 import NetInfo from "@react-native-community/netinfo";
 import { uploadToCloudinary } from "./CloudinaryConfig";
 import { emitPostAdded } from "./PostEvent";
-
+import Constants from 'expo-constants';
+const API_URL = Constants.manifest.extra.API_URL_DATA;
 const useOfflinePostSync = () => {
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener(async (state) => {
@@ -33,7 +34,7 @@ const useOfflinePostSync = () => {
                 hashtags: post.hashtags || [],
               };
 
-              const response = await fetch("http://localhost:8000/data/posts", {
+              const response = await fetch(`${API_URL}/posts`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload),
@@ -47,7 +48,7 @@ const useOfflinePostSync = () => {
 
             } catch (err) {
               console.warn("Post retry failed:", err.message);
-              remainingPosts.push(post); // Keep in queue
+              remainingPosts.push(post); 
             }
           }
 
@@ -71,7 +72,7 @@ export const retryOfflinePosts = async () => {
 
     for (const post of queue) {
       try {
-        const response = await fetch("http://<YOUR-IP>:8000/data/posts", {
+        const response = await fetch(`${API_URL}/posts`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(post),
@@ -85,7 +86,6 @@ export const retryOfflinePosts = async () => {
       }
     }
 
-    // Remove successful posts
     const remainingPosts = queue.filter(p => !successfulUploads.includes(p));
     await AsyncStorage.setItem('offlinePosts', JSON.stringify(remainingPosts));
   } catch (e) {

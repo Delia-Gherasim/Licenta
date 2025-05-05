@@ -1,13 +1,21 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Camera } from "expo-camera";
-import { Platform, Slider, StyleSheet, View } from "react-native";
+import { Platform, StyleSheet, View, TouchableOpacity, Text } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 
-export default function MobileCamera({ setImageUri }) {
+export default function MobileCamera({ setImageUri, pickImage }) {
   const [hasPermission, setHasPermission] = useState(null);
   const [cameraType, setCameraType] = useState(Camera.Constants.Type.back);
   const [flashMode, setFlashMode] = useState(Camera.Constants.FlashMode.off);
   const [zoom, setZoom] = useState(0);
   const cameraRef = useRef(null);
+
+  useEffect(() => {
+    (async () => {
+      const { status } = await Camera.requestPermissionsAsync();
+      setHasPermission(status === "granted");
+    })();
+  }, []);
 
   const toggleCameraType = () => {
     setCameraType((prev) =>
@@ -42,21 +50,22 @@ export default function MobileCamera({ setImageUri }) {
           zoom={zoom}
           ref={cameraRef}
         >
-          <View style={styles.zoomContainer}>
-            <Slider
-              style={{ width: 200 }}
-              minimumValue={0}
-              maximumValue={1}
-              value={zoom}
-              onValueChange={(value) => setZoom(value)}
-              minimumTrackTintColor="#fff"
-              maximumTrackTintColor="#888"
-            />
-          </View>
         </Camera>
       ) : (
         <Text style={styles.statusText}>Requesting permissions...</Text>
       )}
+      <TouchableOpacity onPress={pickImage} style={[styles.iconButton, styles.folderButton]}>
+        <Ionicons name="folder-open" size={32} color="white" />
+      </TouchableOpacity>
+      <TouchableOpacity onPress={takePhoto} style={styles.captureButton}>
+        <Ionicons name="camera" size={24} color="white" />
+      </TouchableOpacity>
+      <TouchableOpacity onPress={toggleFlash} style={[styles.iconButton, styles.flashButton]}>
+        <Ionicons name={flashMode === Camera.Constants.FlashMode.off ? "flash-off" : "flash"} size={32} color="white" />
+      </TouchableOpacity>
+      <TouchableOpacity onPress={toggleCameraType} style={[styles.iconButton, styles.switchButton]}>
+        <Ionicons name="camera-reverse" size={32} color="white" />
+      </TouchableOpacity>
     </>
   );
 }
@@ -66,16 +75,32 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
   },
-  zoomContainer: {
+  iconButton: {
     position: "absolute",
-    bottom: 90,
-    alignItems: "center",
-    justifyContent: "center",
+    padding: 10,
+    backgroundColor: "#416788",  
+    borderRadius: 50,
+  },
+  folderButton: {
+    bottom: 20,
+    left: 20,
+  },
+  captureButton: {
+    bottom: 20,
+    left: "50%",
+    transform: [{ translateX: -30 }], 
+  },
+  flashButton: {
+    bottom: 20,
+    right: 80,
+  },
+  switchButton: {
+    bottom: 20,
+    right: 20, 
   },
   statusText: {
-    color: "#fff",
-    fontSize: 16,
-    marginTop: 20,
+    color: "white",
     textAlign: "center",
+    marginTop: 20,
   },
 });

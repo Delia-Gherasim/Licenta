@@ -6,14 +6,16 @@ import {
   TextInput,
   StyleSheet,
   ScrollView,
+  Platform,
 } from "react-native";
 import useComments from "./hooks/useComments";
 import useVotes from "./hooks/useVotes";
 import useReplies from "./hooks/useReplies";
 import CommentItem from "./CommentItem";
 import AuthObserver from "../../../utils/AuthObserver";
-
-const API_URL = "http://localhost:8000";
+import { emit } from "../../../utils/EventBus";
+import Constants from 'expo-constants';
+const API_URL = Constants.manifest.extra.API_URL_DATA;
 
 export default function Comments({ postId }) {
   const { comments: initialComments, refreshComments } = useComments(postId);
@@ -21,6 +23,8 @@ export default function Comments({ postId }) {
   const { repliesMap, fetchReplies } = useReplies(postId);
   const [comments, setComments] = useState([]);
   const [userId, setUserId] = useState(null);
+  const [postOwnerId, setPostOwnerId] = useState(null);
+
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -29,7 +33,22 @@ export default function Comments({ postId }) {
     };
     fetchUser();
     setComments(initialComments);
-  }, [initialComments]);
+  }, [initialComments, postId]);
+
+  useEffect(() => {
+    const fetchPostOwner = async () => {
+      try {
+        const response = await fetch(`${API_URL}/posts/${postId}`);
+        const postData = await response.json();
+        setPostOwnerId(postData.userId); 
+      } catch (error) {
+        console.error("Error fetching post owner:", error);
+      }
+    };
+    if (postId) {
+      fetchPostOwner();
+    }
+  }, [postId]);
 
   const [newComment, setNewComment] = useState("");
   const [showRepliesMap, setShowRepliesMap] = useState({});
@@ -38,7 +57,7 @@ export default function Comments({ postId }) {
 
   const submitNewComment = async () => {
     if (!newComment.trim() || !userId) return;
-    
+
     const body = {
       postId,
       userId,
@@ -49,13 +68,19 @@ export default function Comments({ postId }) {
     };
 
     try {
-      await fetch(`${API_URL}/data/comments/`, {
+      await fetch(`${API_URL}/comments/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
-      setNewComment("");
       refreshComments();
+      setNewComment("");
+      if (postOwnerId !== userId) {
+        const userName = await AuthObserver.fetchUserName(userId);
+        const message = `${userName} commented on your post!`;
+        emit("notifyUser", { message });
+      }
+      
     } catch (error) {
       console.error("Failed to submit comment:", error);
     }
@@ -100,76 +125,99 @@ export default function Comments({ postId }) {
     };
 
     try {
-      await fetch(`${API_URL}/data/comments/`, {
+      await fetch(`${API_URL}/comments/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
-      const replies = await fetchReplies(parentId);
-      replies.forEach((reply) => fetchVoteTotal(reply.commentId));
+
+      const updatedReplies = await fetchReplies(parentId);
+      setShowRepliesMap((prev) => ({
+        ...prev,
+        [parentId]: true, 
+      }));
       setReplyInputs((prev) => ({ ...prev, [parentId]: "" }));
       setReplyVisibleMap((prev) => ({ ...prev, [parentId]: false }));
+
+      const commentOwnerId = updatedReplies[0]?.userId; 
+      if (commentOwnerId) {
+        if (commentOwnerId != userId){
+        const userName = await AuthObserver.fetchUserName(userId);
+        const message = `${userName} replied to your comment!`;
+        emit("notifyUser", { message }); }
+      }
+      fetchReplies(parentId); 
+
     } catch (error) {
       console.error("Failed to submit reply:", error);
     }
   };
 
   return (
-    <View style={{ flex: 1 }}>
+    <ScrollView
+      contentContainerStyle={styles.scrollContent}
+      keyboardShouldPersistTaps="handled"
+    >
       <View style={styles.commentInputContainer}>
         <TextInput
           style={styles.replyInput}
           placeholder="Add a comment..."
           value={newComment}
           onChangeText={setNewComment}
+          multiline
         />
-        <Button title="Post Comment" onPress={submitNewComment} />
+        <Button title="Post" onPress={submitNewComment} />
       </View>
-  
-      <View contentContainerStyle={styles.scrollContent}>
-        <View style={styles.commentsContainer}>
-          {comments
-            .filter((c) => c.parentId === null)
-            .map((comment) => (
-              <CommentItem
-                key={comment.commentId}
-                comment={comment}
-                userId={userId}
-                votes={votes}
-                onReplySubmit={submitReply}
-                showRepliesMap={showRepliesMap}
-                toggleReplies={toggleReplies}
-                repliesMap={repliesMap}
-                replyVisibleMap={replyVisibleMap}
-                toggleReplyInput={toggleReplyInput}
-                replyInputs={replyInputs}
-                handleReplyChange={handleReplyChange}
-                onDelete={(id) =>
-                  setComments((prev) => prev.filter((c) => c.commentId !== id))
-                }
-              />
-            ))}
-        </View>
+
+      <View style={styles.commentsContainer}>
+        {comments
+          .filter((c) => c.parentId === null)
+          .map((comment) => (
+            <CommentItem
+              key={comment.commentId}
+              comment={comment}
+              userId={userId}
+              votes={votes}
+              onReplySubmit={submitReply}
+              showRepliesMap={showRepliesMap}
+              toggleReplies={toggleReplies}
+              repliesMap={repliesMap}
+              replyVisibleMap={replyVisibleMap}
+              toggleReplyInput={toggleReplyInput}
+              replyInputs={replyInputs}
+              handleReplyChange={handleReplyChange}
+              onDelete={(id) =>
+                setComments((prev) => prev.filter((c) => c.commentId !== id))
+              }
+            />
+          ))}
       </View>
-    </View>
+    </ScrollView>
   );
-  
 }
 
 const styles = StyleSheet.create({
   scrollContent: {
     padding: 10,
+    flexGrow: 1,
   },
   commentInputContainer: {
     marginVertical: 10,
+    flexDirection: "row",
+    alignItems: "center",
   },
   replyInput: {
-    borderWidth: 1,
+    flex: 1,
+    borderWidth: 2,
     borderColor: "#ccc",
-    padding: 5,
+    padding: 10,
     marginVertical: 5,
+    marginRight: 10,
+    borderRadius: 5,
+    textAlignVertical: "top",
   },
   commentsContainer: {
     paddingLeft: 20,
+    flexGrow: 1,
   },
 });
