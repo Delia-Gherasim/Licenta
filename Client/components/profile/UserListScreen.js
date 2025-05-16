@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, ScrollView, Button } from "react-native";
 import AuthObserver from "../../utils/AuthObserver";
 import Constants from 'expo-constants';
+import authorizedFetch from "../../utils/authorizedFetch";
 const API_URL = Constants.expoConfig.extra.API_URL_DATA;
 
 const UserListScreen = ({ route }) => {
@@ -23,7 +24,7 @@ const UserListScreen = ({ route }) => {
       const fetched = [];
       for (const id of listIds) {
         try {
-          const res = await fetch(`${API_URL}/users/${id}`);
+          const res = await authorizedFetch(`${API_URL}/users/${id}`);
           const user = await res.json();
           if (!user.error) fetched.push(user);
         } catch (err) {
@@ -52,7 +53,7 @@ const UserListScreen = ({ route }) => {
         : `${API_URL}/users/${userId}/unfollow/${targetUserId}`;
 
     try {
-      const res = await fetch(url, { method: "POST" });
+      const res = await authorizedFetch(url, { method: "POST" });
       if (!res.ok) throw new Error("Action failed");
       setListIds((prev) => prev.filter((id) => id !== targetUserId));
     } catch (err) {

@@ -12,7 +12,7 @@ class CompositionStrategy(Strategy):
         rule_thirds = result["rule_of_thirds"]
         leading_lines = result["leading_lines"]
         symmetry = result["symmetry"]
-        clip_score = result["clip_composition_score"]
+        overall_score = result["overall_composition_score"]
 
         feedback = []
 
@@ -36,18 +36,26 @@ class CompositionStrategy(Strategy):
         else:
             feedback.append("Moderate symmetry detected. Consider refining alignment or balancing elements to strengthen composition.")
 
-        if clip_score >= 0.6:
+        if overall_score >= 0.8:
             quality = "excellent"
-        elif clip_score >= 0.45:
+        elif overall_score >= 0.6:
             quality = "good"
-        elif clip_score >= 0.3:
+        elif overall_score >= 0.4:
             quality = "decent"
-        elif clip_score >= 0.15:
+        elif overall_score >= 0.2:
             quality = "average"
         else:
-            quality = "poor"
+            quality = "bad"
 
-        feedback.append(f"Overall, the composition is assessed as **{quality}** based on visual aesthetics.")
+        prompts = {
+            "excellent": "a photo with excellent composition, following photography aesthetic principles",
+            "good": "photo with good composition, following photography aesthetic principles",
+            "decent": "a photo with decent composition, maybe following photography aesthetic principles",
+            "average": "a photo with average composition, not following photography aesthetic principles",
+            "bad": "a photo with bad composition, not following photography aesthetic principles"
+        }
+
+        feedback.append(f"Overall, the composition is assessed as **{quality}** — {prompts[quality]}.")
 
         tips = [
             " Pay attention to visual weight distribution to achieve **left-right and top-bottom balance**.",
@@ -58,8 +66,7 @@ class CompositionStrategy(Strategy):
             " Ensure your chosen **perspective (eye-level, high-angle, or low-angle)** serves the subject's narrative purpose."
         ]
 
-        return "Composition Analysis:\n\n" + "\n".join(feedback) + "\n\n Tips for Improvement:\n" + "\n".join(tips)
-
+        return "Composition Analysis:\n\n" + "\n".join(feedback) + "\n\nTips for Improvement:\n" + "\n".join(tips)
 
 class ChromaticStrategy(Strategy):
     def __init__(self):

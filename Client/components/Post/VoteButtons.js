@@ -4,6 +4,8 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import AuthObserver from '../../utils/AuthObserver';
 import { useNotifications } from '../../NotificationContext'; 
 import Constants from 'expo-constants';
+import authorizedFetch from '../../utils/authorizedFetch';
+
 const API_URL = Constants.expoConfig.extra.API_URL_DATA;
 const VoteButtons = ({ commentId }) => {
   const [userVote, setUserVote] = useState(null);
@@ -22,8 +24,8 @@ const VoteButtons = ({ commentId }) => {
 
   const fetchVotesData = () => {
     if (!userId) return;
-
-    fetch(`${API_URL}/votes/${commentId}/user/${userId}`)
+    
+    authorizedFetch(`${API_URL}/votes/${commentId}/user/${userId}`)
       .then(res => res.json())
       .then(data => setUserVote(data.vote))
       .catch(err => {
@@ -31,7 +33,7 @@ const VoteButtons = ({ commentId }) => {
         setUserVote(null);
       });
 
-    fetch(`${API_URL}/votes/${commentId}/total?userId=${userId}`)
+    authorizedFetch(`${API_URL}/votes/${commentId}/total?userId=${userId}`)
       .then(res => res.json())
       .then(data => setTotalVotes(data.total))
       .catch(err => {
@@ -39,7 +41,7 @@ const VoteButtons = ({ commentId }) => {
         setTotalVotes(0);
       });
 
-    fetch(`${API_URL}/comments/${commentId}`)
+    authorizedFetch(`${API_URL}/comments/${commentId}`)
       .then(res => res.json())
       .then(data => {
         setCommentOwnerId(data.userId);
@@ -57,7 +59,7 @@ const VoteButtons = ({ commentId }) => {
     if (!userId) return;
 
     if (userVote === vote) {
-      fetch(`${API_URL}/votes/remove`, {
+      authorizedFetch(`${API_URL}/votes/remove`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ commentId, userId }),
@@ -74,7 +76,7 @@ const VoteButtons = ({ commentId }) => {
         })
         .catch(err => console.error('Error removing vote:', err));
     } else {
-      fetch(`${API_URL}/votes/vote`, {
+      authorizedFetch(`${API_URL}/votes/vote`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ commentId, userId, vote }),
@@ -90,12 +92,12 @@ const VoteButtons = ({ commentId }) => {
           }
 
           if (commentOwnerId && userId !== commentOwnerId) {
-            AuthObserver.fetchUserProfile(userId) 
+            AuthObserver.fetchUserProfile(commentOwnerId) 
               .then(username => {
                 const message = `${username} voted ${vote ? "like" : "dislike"} on your comment!`;
                 addNotification({ message });  
               });
-          }
+            }       
         })
         .catch(err => console.error('Error posting vote:', err));
     }

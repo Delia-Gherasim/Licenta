@@ -14,11 +14,13 @@ import PostItem from "../Post/PostComponent/PostItem";
 import { Dimensions } from "react-native";
 import Toast from "react-native-toast-message";
 import Constants from 'expo-constants';
-const API_URL = Constants.expoConfig.extra.API_URL_DATA;
+import authorizedFetch from "../../utils/authorizedFetch";
+import AuthObserver from "../../utils/AuthObserver";
 
+const API_URL = Constants.expoConfig.extra.API_URL_DATA;
 const POST_STORAGE_KEY = Constants.expoConfig.extra.POST_STORAGE_KEY;
 
-export default function Feed({ userId }) {
+export default function Feed() {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [activeFeed, setActiveFeed] = useState("global");
@@ -27,10 +29,11 @@ export default function Feed({ userId }) {
   const [showRefreshButton, setShowRefreshButton] = useState(false);
   const [fetchError, setFetchError] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [userId, setUserId] = useState(null);
 
   const fetchWithTimeout = useCallback((url, options = {}, timeout = 5000) => {
     return Promise.race([
-      fetch(url, options),
+      authorizedFetch(url, options),
       new Promise((_, reject) =>
         setTimeout(() => reject(new Error("Timeout")), timeout)
       ),
@@ -74,7 +77,7 @@ export default function Feed({ userId }) {
       const endpoint =
         type === "friends"
           ? `${API_URL}/posts/all_friends/${userId}`
-          : API_URL+"/posts/";
+          : API_URL + "/posts/";
 
       setActiveFeed(type);
       setLoading(true);
@@ -86,6 +89,7 @@ export default function Feed({ userId }) {
         if (!response.ok) throw new Error("Server error");
 
         const data = await response.json();
+        console.log("Fetched data:", data);
         if (!Array.isArray(data.posts)) throw new Error("Invalid posts data");
 
         setPosts(data.posts);
@@ -108,6 +112,24 @@ export default function Feed({ userId }) {
     setIsRefreshing(true);
     if (activeFeed) fetchPosts(activeFeed);
   }, [activeFeed, fetchPosts]);
+
+  useEffect(() => {
+    const getUserId = async () => {
+      const id = await AuthObserver.getCurrentUserId();
+      if (id) {
+        setUserId(id);
+      } else {
+        console.error("User ID not found in AuthObserver");
+      }
+    };
+    getUserId();
+  }, []);
+
+  useEffect(() => {
+    if (userId) {
+      fetchPosts(activeFeed);
+    }
+  }, [fetchPosts, activeFeed, userId]);
 
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener((state) => {
@@ -142,10 +164,6 @@ export default function Feed({ userId }) {
 
     return () => unsubscribe();
   }, [isConnected, wasOffline, loadPostsFromLocalStorage]);
-
-  useEffect(() => {
-    fetchPosts(activeFeed);
-  }, [fetchPosts, activeFeed]);
 
   const handleSwitchChange = (value) => {
     const feedType = value ? "global" : "friends";
@@ -219,8 +237,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   bottomSpace: {
-    height: 80, 
-},
+    height: 80,
+  },
   scrollContent: {
     paddingVertical: 10,
     paddingHorizontal: 10,

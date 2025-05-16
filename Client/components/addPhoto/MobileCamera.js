@@ -7,7 +7,6 @@ export default function MobileCamera({ setImageUri, pickImage }) {
   const [hasPermission, setHasPermission] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
 
-  // Request camera permissions when the component mounts
   useEffect(() => {
     const requestPermissions = async () => {
       try {
@@ -26,7 +25,6 @@ export default function MobileCamera({ setImageUri, pickImage }) {
     requestPermissions();
   }, []);
 
-  // Function to open the camera app and capture a photo
   const takePhoto = async () => {
     try {
       const result = await ImagePicker.launchCameraAsync({
@@ -45,12 +43,10 @@ export default function MobileCamera({ setImageUri, pickImage }) {
     }
   };
 
-  // Handle the loading state when requesting permissions
   if (hasPermission === null) {
     return <Text>Requesting camera permission...</Text>;
   }
 
-  // Handle the case where permission is denied
   if (hasPermission === false) {
     return <Text>{errorMessage || "No access to camera"}</Text>;
   }
@@ -58,18 +54,15 @@ export default function MobileCamera({ setImageUri, pickImage }) {
   return (
     <View style={styles.container}>
       <View style={styles.cameraControls}>
-        {/* Button to open gallery */}
         <TouchableOpacity onPress={pickImage} style={[styles.iconButton, styles.folderButton]}>
           <Ionicons name="folder-open" size={32} color="white" />
         </TouchableOpacity>
 
-        {/* Button to open the device's camera app */}
         <TouchableOpacity onPress={takePhoto} style={styles.captureButton}>
           <Ionicons name="camera" size={24} color="white" />
         </TouchableOpacity>
       </View>
 
-      {/* Display error message if any */}
       {errorMessage && <Text style={styles.errorMessage}>{errorMessage}</Text>}
     </View>
   );

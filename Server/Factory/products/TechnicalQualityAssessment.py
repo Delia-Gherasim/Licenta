@@ -46,9 +46,10 @@ class TechnicalQualityAssessment(BaseModel):
         return mean_brightness
     
     def _get_noise_score(self, img_np):
-        gray = cv2.cvtColor(img_np, cv2.COLOR_RGB2GRAY)
-        laplacian = cv2.Laplacian(gray, cv2.CV_64F)
-        variance = laplacian.var()
-        
-        return variance
+        gray = cv2.cvtColor(img_np, cv2.COLOR_RGB2GRAY).astype(np.float32)
+        blur = cv2.GaussianBlur(gray, (3, 3), 0)
+        residual = gray - blur
+        noise_std = residual.std()
+        return float(noise_std)
+
     

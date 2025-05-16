@@ -40,7 +40,6 @@ class UsersService:
         return await self.retry(self.users_repo.update_user, user_id, user)
 
     async def _follow_helper(self, user_id: str, target_id: str, follow: bool):
-        # Validate both users concurrently
         if not all(await asyncio.gather(self._validate_user(user_id), self._validate_user(target_id))):
             return {"error": "Invalid user IDs"}
         return await self.retry(self.users_repo.follow_update, user_id, target_id, follow)
@@ -52,7 +51,6 @@ class UsersService:
         return await self._follow_helper(user_id, target_user_id, False)
 
     async def _follower_helper(self, user_id: str, follower_id: str, add: bool):
-        # Validate both users concurrently
         if not all(await asyncio.gather(self._validate_user(user_id), self._validate_user(follower_id))):
             return {"error": "Invalid user IDs"}
         return await self.retry(self.users_repo.follower_update, user_id, follower_id, add)

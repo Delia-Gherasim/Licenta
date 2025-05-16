@@ -1,0 +1,205 @@
+
+{
+   "Nature photography":{
+      "description":[
+          "When shooting outdoors, there are several things to keep in mind. Thanks to inclement weather, constantly changing light, and uncooperative wildlife, nature photography shoots are different every time.",
+          "One of the biggest challenges in shooting outdoors is nailing the proper exposure. If a cloud moves overhead, the lack of light could quickly underexpose your images. A quick fix for this is to regularly check your exposures as you shoot and don’t delete any photos before you can look at them indoors. This is also where technical expertise comes in :it’s easy to get distracted or excited when shooting outdoors. So practicing your technical skills enough so that they become second nature can save you in the long run. There’s nothing worse than shooting a full day of photos, only to look at them later and find they’re all over- or underexposed. ",
+        "Another major element of shooting outdoors is respecting your surroundings and understanding the environment you’re shooting in. This holds true whether it’s your backyard or a remote location you’ve backpacked in to see. ",
+          "Nature photography is a versatile medium with a unique set of challenges and the potential to tell compelling stories. Whether you’re experimenting with shutter speed to catch an animal in motion, or you’re trying out different depths of field in your close-up flower photograph, it takes patience and creativity to capture the great outdoors successfully."    
+      ],
+      "tips" : [
+          "Take close-up or macro photos of plants in your backyard or neighborhood",
+          "Crop close in on textures like tree bark, leaves, petals or even a spider’s web",
+          "Practice shooting local birds using a fast shutter speed",
+          "Visit nearby nature areas and take full landscape shots",
+          "Use natural night, either direct or indirect, from the sun or moon. Make the “Golden Hour” your best friend"
+      ],
+      "image_link": "https://www.adobe.com/creativecloud/photography/type/media_11b6b903eab337a3f8fc93db3ab80c91f51a28e15.jpg?width=2000&format=webply&optimize=medium"
+  },
+  "Landscape photography":{
+      "description": [
+          "Shooting landscapes is its own skill, but it also falls within the category of nature photography. To capture the best possible shot, landscape photographer Samuel Nute says, “Be patient for the conditions to line up and try to get a different spin on popular landscapes.” Outside of dealing with the weather, finding your voice and style is the most challenging part of landscape photography.",
+          "It’s all about the light. If there’s one thing to keep in mind, it’s light. Dawn and dusk (also known as the golden hours) offer the perfect lighting conditions for great landscape imagery. This is also the time to capture beautiful sky photos. ",
+          "Pack the right gear. Wide-angle lenses are ideal for stunning landscape photographs. They allow you to capture a deeper depth of field than telephoto lenses, so your whole scene is in focus. As with any other kind of nature photography, the right gear makes all the difference, so be sure you’ve thought about which lenses to bring."
+      ],
+      "tips" : [
+          "Choose your point of focus",
+          "Add some foreground layers for depth",
+          "Take advantage of leading and other strong lines"
+      ],
+      "image_link": "https://www.adobe.com/creativecloud/photography/type/media_1b835e6be2cf7132b3fdf59a1970f7baec5604c7f.jpg?width=2000&format=webply&optimize=medium"
+    },
+ "Astrophotography":{
+    "description": "The night sky can be the ultimate canvas for a photographer — there’s something magnetic about it that keeps people looking up at the stars. With the right equipment and knowledge, you can take gorgeous pictures of everything from star clusters to the new moon, joining your fellow astrophotographers in mapping out deep space.",
+    "tips" : [
+        "ISO refers to how light sensitive the film in your camera is. In modern digital cameras, it refers to the sensitivity of the sensor in the camera to light. Higher ISO settings will result in brighter images, but they will also increase the graininess of your images. For astrophotography, you want to keep the ISO as low as you can, while still enhancing the light sensitivity, in order to keep your images of the sky as crisp and clear as possible.",
+        "Shutter speed determines how long the shutter on your camera is going to remain open and allow light to hit the film in your camera or its digital sensor. It’s measured in relation to seconds, so a fast shutter speed might be 1/1,000 of a second, while a slow speed might be one second. For night photography, you’re going to have to use a tripod, because you need to use really slow shutter speeds, and you don’t want your image to blur. Try exposures of 5, 8, or even 10 seconds, and examine your results to see what looks best.",
+        "You’ll likely need to use a lower aperture setting (called an f-stop), because while higher f-stops will allow for an image with more depth of field, it will be difficult to get enough light for a good exposure. Because you’re not likely to be drawing attention to depth of field in photos of the stars, higher aperture settings will be the way to go (with exceptions of course)."
+    ],
+    "image_link":"https://www.adobe.com/creativecloud/photography/type/media_149707bfda768a23fb2c0dc24af6a59f4f1bfed57.jpg?width=2000&format=webply&optimize=medium"
+  },
+ "Storm photography":{
+    "description": "The unpredictability of lightning and storms makes them alluring photography subjects. Awe-inspiring pictures that capture lightning strikes and unique images of storms fascinate viewers and can also help in the study of weather.  ",
+    "tips": [
+        "Set your camera up with a cable release or a lightning trigger so you can shoot from your car or a nearby structure. While cars are fairly safe, you’re not a hundred percent safe unless you’re in a building and not touching anything that’s connected to an outlet or plumbing",
+        "If you must be outside, avoid being the tallest object where you are and don’t stand under the tallest objects either, like trees or power lines. If a nearby tree gets struck, the current could travel to you or the tree could explode. If you absolutely can’t get inside in time, get on your tiptoes while crouching down; you want to be as low as possible, while also minimizing contact with the ground.",
+        "Using a wide-angle lens is a great way to capture a full storm structure in one shot — but be sure to protect it. Even if you are miles from the storm, there may be precipitation. Keep your camera under an awning or shoot from inside your vehicle to stay dry.",
+        "Your ideal settings for shooting lightning will depend on the amount of ambient light and how close you are to the storm. If your goal is to capture as many lightning bolts as possible, longer exposures are key. A shorter exposure (aided by a lightning trigger) is best for capturing a single bolt of lightning.",
+        "Set a long exposure in the evening. Remember, longer exposures (anything longer than 1/60 of a second) increase your chances of capturing lightning. Experiment by setting the longest exposure possible without overexposing the image — unless you’re shooting during the day.",
+        "Narrow your aperture. During the day, narrowing your aperture can help you shoot a longer exposure even in the sunlight. Try taking a test shot and then adjusting as necessary based on your results. Continue to narrow the aperture as the lightning gets closer and closer."
+    ],
+    "image_link":"https://www.adobe.com/creativecloud/photography/type/media_1600a2026504feac421e7b0edb720c89a4a213bd8.png?width=2000&format=webply&optimize=medium"
+  },
+"Pet photography":{
+  "description": " Get up close and personal with animals and take photos of people’s pets. Animal photography comes with its own special challenges, but preparation and an ability to adapt during a shoot will help you snap great shots. Plus, learn some post-processing techniques to make photos of dogs and cats with dark fur pop."
+},
+ "Wild animals photography":{
+  "description": [
+      "Capture the beauty and behavior of wildlife in their natural habitats. Patience and understanding animal behavior are key.",
+      "When it comes to capturing wildlife and animals in motion, preparedness is key. Animals move fast, and any delay on your part can mean a missed opportunity. An appropriately fast shutter speed can save you in this situation. Make sure your shutter is fast enough to eliminate accidental camera movement so you can freeze your subject in time. Animals can be tricky to find and hard to track. And while you may not see them, they definitely see you. Sometimes you’ll immediately stumble upon a great shot or a rare animal; otherwise, you’ll have to practice patience. Just when you decide no moose will show up, one could pop out of the woods a few yards away.",
+      "Animals are not always willing subjects — even when they’re trained pets. Approach your shoot with a plan in mind and be prepared to work with your photos in post-processing. You can’t always find an original or interesting shot in the moment but applying edits later can turn a mundane photo into a great image."
+  ],
+  "image_link": "https://www.adobe.com/creativecloud/photography/type/media_147b4d792cd5e1b2cc80e811c68abdfad35a51a51.jpg?width=2000&format=webply&optimize=medium"
+},
+"Macro photography":{
+  "description": "Macro photography is all about showcasing a subject larger than it is in real life — an extreme close-up of something small. A full-frame insect in a five-by-seven-inch photo and a four-inch product shot of a cornflake go well above life-size: both are examples of macro photography.",
+  "tips":[
+      "I think the hardest thing about macro photography is actually previsualization — learning to recognize what a good macro subject might be,” says Long. “Because when you’re going into macro distances, things just look completely different than what you see in the real world. You might be sitting in front of a great macro subject and have no idea.",
+      "First things first, before any macro photography advice will be useful, you’ll need a macro lens. While most lenses shoot at a ratio of 1:2.8 and greater, macro lenses shoot at a 1:1 ratio and can focus only within the macro range of about 12 inches or fewer — essential for the super-sharp focus needed to make the minuscule larger than life.",
+      "Plan what you want to capture. Working with smaller subjects means your depth of field shrinks, making it very important to go into macro shoots with a plan for what photos you want to get.",
+      "Shed some light on your subject.Much like detail is amplified in a macro shot, so too are the effects of light and shadow — and these are things you can control in some macro shoots, much to your advantage.",
+      "Consider your scene. Beyond lighting and photo-ruining dust motes, your background is another area to pay attention to. With your focus so dialed in on your tiny subject, it can be easy to forget to check your background.", 
+      "Beware of movement. Motion always has the potential to add blur to a photo, and much like all aspects of macro photography, that issue increases with small subjects and scenes. A good setup is key to keep the camera body steady."
+  ],
+  "image_link":"https://www.adobe.com/creativecloud/photography/technique/media_15120b354043e198234fab2f796603a9f28486420.jpg?width=2000&format=webply&optimize=medium"
+},
+ "Flower photography":{
+  "description": "Plants, when it comes to predictability, are the perfect subject. “The tricky thing is depth of field,” teacher and nature photographer Ben Long says. “When you’re getting close to a flower, your depth of field will be shallow, so you may not get all the details that you want in focus.” Bring a tripod with you so you can use longer exposures and smaller apertures to make your depth of field deeper. While you have more control over your subject with plant photography, you still have the elements to deal with. Don’t let a breeze ruin your long exposure. Try shielding your subject or bring clamps to hold the flower in place. Plants are an agreeable subject, but they’re also a very common subject. Rather than being intimidated by this, Davidson says this “allows you to play and try new things.” Push your creativity and find a unique way to make your image interesting.",
+  "tips" : [
+      "Find your focal point.Depending on the plants you’re photographing, it might be a challenge to know what you want to focus on. Choose a specific aspect of the plant you’d like to feature or look for ways to build plant life into other photo compositions.",
+      "Think ahead about color. Flowerless plants might not seem as colorful and interesting as flowering plants at first, but it’s all in the approach. If you’re looking to capture deep emerald greens, think about how you can make those colors pop in your composition. Or, if you’re capturing the muted greens of desert plant life, play up the dusty, unsaturated tones.",
+      "Highlight patterns and textures.Sometimes the most captivating part of the plant isn’t the shape — it’s the surface of the leaves, stems, or bark. Look for the multi-layered whorl patterns in eucalyptus bark or the unique stripes on a snake plant, for example, and highlight that.",
+      "Look for the details. Focus on unusual and interesting details in the plants you’re photographing and frame your shot accordingly. For example, if you want to capture the silhouette of a cactus, shoot from a distance. Or, if you’re photographing a fiddle leaf fern, consider doing a close-up or macro shot."
+  ],
+  "image_link":"https://www.adobe.com/creativecloud/photography/type/media_1e1252a8ba25e4702da17a324d6c7b46990aadba5.png?width=2000&format=webply&optimize=medium"
+},
+ "architecture photography":{
+  "description": "Discover how to showcase the interesting vantage points of buildings and highlight their intriguing features.",
+  "tips" : [
+      ""
+  ],
+  "image_link" :""
+},
+ "real estate photography":{
+  "description": "Build a career capturing home photos with advice on technical choices surrounding gear and lighting.",
+  "tips" : [
+      ""
+  ],
+  "image_link" :""
+},
+ "aerial photography":{
+  "description": "Explore the challenges involved when you pilot a drone to snap pictures and gain advice on how to get the best images from this bird’s eye view.",
+  "tips" : [
+      ""
+  ],
+  "image_link" :""
+},
+ "portrait photography":{
+  "description": "Learn how to capture the essence of a person through lighting, composition, and interaction.",
+  "tips" : [
+      ""
+  ],
+  "image_link" :""
+},
+ "headshot photography":{
+  "description": "Focus on capturing professional headshots with attention to lighting, background, and expression.",
+  "tips" : [
+      ""
+  ],
+  "image_link" :""
+},
+"fashion photography":{
+  "description": "Explore the world of fashion photography, including styling, lighting, and working with models.",
+  "tips" : [
+      ""
+  ],
+  "image_link" :""
+},
+ "sports photography":{
+  "description": "Capture the intensity and motion of sports events with tips on shutter speed, positioning, and equipment.",
+  "tips" : [
+      ""
+  ],
+  "image_link" :""
+},
+ "documentary photography":{
+  "description": "Tell compelling stories through images by capturing real-life events and environments.",
+  "tips" : [
+      ""
+  ],
+  "image_link" :""
+},
+"street photography":{
+  "description": "Discover techniques for capturing candid moments and the essence of urban life.",
+  "tips" : [
+      ""
+  ],
+  "image_link" :""
+},
+"wedding photography":{
+  "description": "Learn how to document weddings with a focus on emotion, composition, and storytelling.",
+  "tips" : [
+      ""
+  ],
+  "image_link" :""
+},
+"event photography":{
+  "description": "Capture the energy and key moments of events with strategies for lighting and timing.",
+  "tips" : [
+      ""
+  ],
+  "image_link" :""
+},
+ "food photography":{
+  "description": "Get tips on lighting, composition, and styling to make food look as appetizing as possible.",
+  "tips" : [
+      ""
+  ],
+  "image_link" :""
+},
+ "product photography":{
+  "description": "Learn how to showcase products effectively with attention to lighting, background, and angles.",
+  "tips" : [
+      ""
+  ],
+  "image_link" :""
+},
+ "still life photography":{
+  "description": "Explore composition, lighting, and subject arrangement to create compelling still life images.",
+  "tips" : [
+      ""
+  ],
+  "image_link" :""
+},
+ "black and white photography":{
+  "description": "Understand how to use contrast, texture, and composition to create striking monochrome images.",
+  "tips" : [
+      ""
+  ],
+  "image_link" :""
+},
+ "fine art photography":{
+  "description": "Delve into creating images that express artistic vision and conceptual ideas.",
+  "tips" : [
+      ""
+  ],
+  "image_link" :""
+},
+"abstract photography":{
+  "description": "Experiment with shapes, colors, and patterns to create abstract photographic art.",
+  "tips" : [
+      ""
+  ],
+  "image_link" :""
+}
+}

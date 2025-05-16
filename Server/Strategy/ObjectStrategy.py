@@ -64,13 +64,48 @@ class ObjectStrategy(Strategy):
             "safety equipment": "Focus on clarity, color, and real-life usage scenarios.",
             "clocks": "Play with symmetry, background, and time-of-day context.",
             "cosmetics": "Use soft lighting and macro focus to emphasize elegance and branding.",
-            # fallback
             "uncategorized": "Think about lighting, framing, and context to make your object stand out.",
+        }
+
+        self.age_tips = {
+            "child": "Get down to their level, use fast shutter speeds to catch motion, and keep the scene playful.",
+            "adult": "Use side lighting for dramatic effect or soft light for flattering portraits.",
+            "elderly": "Use soft light and focus on character and expressions to convey depth and emotion."
+        }
+
+        self.emotion_tips = {
+            "happy": "Use natural light to enhance warmth; candid moments often work best.",
+            "sad": "Try black-and-white or moody lighting to emphasize emotion.",
+            "angry": "Use strong contrast and sharp shadows to dramatize intensity.",
+            "surprised": "Capture wide eyes and expressions using burst mode to freeze the moment.",
+            "neutral": "Use clean compositions and soft light to maintain a calm tone.",
+            "fear": "Experiment with low lighting and shallow depth to emphasize unease."
         }
 
     def execute(self, image):
         model = Creator.get_model("object")
         predictions = model.predict(image)
+
+        if isinstance(predictions, dict) and predictions.get("human_detected"):
+            age = predictions["age"]
+            gender = predictions["gender"]
+            emotion = predictions["emotion"]
+
+            if age < 13:
+                age_group = "child"
+            elif age > 60:
+                age_group = "elderly"
+            else:
+                age_group = "adult"
+
+            age_tip = self.age_tips.get(age_group, "")
+            emotion_tip = self.emotion_tips.get(emotion.lower(), "")
+
+            return (
+                f"A human was detected. Gender: {gender}, Age: {age}, Emotion: {emotion}.\n"
+                f"Photography Tip for {age_group}s: {age_tip}\n"
+                f"Based on the emotion '{emotion}', you could try: {emotion_tip}"
+            )
 
         for result in predictions:
             label = result["label"]
@@ -80,5 +115,5 @@ class ObjectStrategy(Strategy):
             tip = self.category_advice.get(category, self.category_advice["uncategorized"])
 
             sentence = f'I am {confidence} % certain you have a {label}. A good tip for "{category}" photography: {tip}'
+            return sentence 
 
-        return sentence

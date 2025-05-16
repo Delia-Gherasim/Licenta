@@ -18,6 +18,7 @@ import { Dimensions } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { emitPostChange } from "../../utils/PostEvent";
 import Constants from 'expo-constants';
+import authorizedFetch from "../../utils/authorizedFetch";
 const API_URL = Constants.expoConfig.extra.API_URL_DATA;
 export default function Settings() {
   const [userData, setUserData] = useState(null);
@@ -55,7 +56,7 @@ export default function Settings() {
 
   const fetchUserData = async (userId) => {
     try {
-      const res = await fetch(`${API_URL}/users/${userId}`);
+      const res = await authorizedFetch(`${API_URL}/users/${userId}`);
       const json = await res.json();
       if (json.error) {
         throw new Error(json.error);
@@ -138,7 +139,7 @@ export default function Settings() {
       const user = AuthObserver.getCurrentUser();
       const userId = user?.uid;
       const payload = { id: userId, name: newName, email: newEmail, bio };
-      const res = await fetch(`${API_URL}/users/${userId}`, {
+      const res = await authorizedFetch(`${API_URL}/users/${userId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -176,7 +177,7 @@ export default function Settings() {
     
     try {
       const user = AuthObserver.getCurrentUser();
-      const res = await fetch(
+      const res = await authorizedFetch(
         `${API_URL}/posts/user/${user?.uid}/delete`,
         { method: "DELETE" }
       );
@@ -193,7 +194,7 @@ export default function Settings() {
     setDeleteAccountModalVisible(false);
     try {
       const user = AuthObserver.getCurrentUser();
-      const res = await fetch(`${API_URL}/users/${user?.uid}`, {
+      const res = await authorizedFetch(`${API_URL}/users/${user?.uid}`, {
         method: "DELETE",
       });
       if (!res.ok) throw new Error("Failed to delete account");

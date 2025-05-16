@@ -15,6 +15,7 @@ import CommentItem from "./CommentItem";
 import AuthObserver from "../../../utils/AuthObserver";
 import { emit } from "../../../utils/EventBus";
 import Constants from 'expo-constants';
+import authorizedFetch from "../../../utils/authorizedFetch";
 const API_URL = Constants.expoConfig.extra.API_URL_DATA;
 
 export default function Comments({ postId }) {
@@ -38,7 +39,7 @@ export default function Comments({ postId }) {
   useEffect(() => {
     const fetchPostOwner = async () => {
       try {
-        const response = await fetch(`${API_URL}/posts/${postId}`);
+        const response = await authorizedFetch(`${API_URL}/posts/${postId}`);
         const postData = await response.json();
         setPostOwnerId(postData.userId); 
       } catch (error) {
@@ -68,7 +69,7 @@ export default function Comments({ postId }) {
     };
 
     try {
-      await fetch(`${API_URL}/comments/`, {
+      await authorizedFetch(`${API_URL}/comments/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
@@ -125,7 +126,7 @@ export default function Comments({ postId }) {
     };
 
     try {
-      await fetch(`${API_URL}/comments/`, {
+      await authorizedFetch(`${API_URL}/comments/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),

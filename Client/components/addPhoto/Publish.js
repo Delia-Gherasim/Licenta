@@ -10,6 +10,7 @@ import { emitPostAdded } from "../../utils/PostEvent";
 import { Dimensions } from 'react-native';
 import { Platform } from 'react-native';
 import Constants from 'expo-constants';
+import authorizedFetch from "../../utils/authorizedFetch";
 const API_URL = Constants.expoConfig.extra.API_URL_DATA;
 const { width, height } = Dimensions.get('window');
 
@@ -88,7 +89,7 @@ export default function Publish({ route }) {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 20000);
 
-        response = await fetch(API_URL+"/posts", {
+        response = await authorizedFetch(API_URL+"/posts", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(postPayload), 
@@ -142,7 +143,7 @@ export default function Publish({ route }) {
                 hashtags: post.hashtags || [],
               };
 
-              const response = await fetch(API_URL+"/posts", {
+              const response = await authorizedFetch(API_URL+"/posts", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload),

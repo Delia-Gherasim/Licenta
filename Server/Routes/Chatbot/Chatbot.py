@@ -5,7 +5,6 @@ from fastapi import APIRouter, Form, HTTPException
 from PIL import Image
 from io import BytesIO
 
-# Importing strategy classes
 from Strategy.AestheticStrategy import AestheticStrategy
 from Strategy.Context import Context
 from Strategy.QualityStrategy import QualityStrategy
@@ -17,25 +16,21 @@ from Strategy.GeneralAdviceStrategy import GeneralAdviceStrategy
 router = APIRouter()
 
 def read_image_from_url(image_url: str) -> Image.Image:
-    """
-    Downloads the image from the Cloudinary URL and returns it as a PIL Image object.
-    """
     try:
         response = requests.get(image_url)
-        response.raise_for_status()  # Will raise an HTTPError if the status code is 4xx/5xx
+        response.raise_for_status() 
         image = Image.open(BytesIO(response.content)).convert("RGB")
         return image
     except requests.exceptions.RequestException as e:
         raise HTTPException(status_code=400, detail=f"Error downloading image: {e}")
 
 @router.get("/")
-async def analyze_image():
+async def get_options():
     options = [
         "aesthetic_score",
         "technical_quality",
         "object_advice",
         "scene_advice",
-        "general_advice",
         "genre_advice"
     ]
     return {"options": options}
@@ -44,12 +39,12 @@ async def analyze_image():
 async def get_advice(
     choice: str = Form(...),
     sub_choice: Optional[str] = Form(None),
-    image_url: str = Form(...),  # Field name is image_url, not imageUrl
+    image_url: str = Form(...), 
 ):
-    # Download and read the image from the Cloudinary URL
+    if choice == "general_advice":
+        raise HTTPException(status_code=400, detail="Use the /general_advice endpoint for this option.")  
     image = read_image_from_url(image_url)
 
-    # Select the strategy based on the user's choice
     if choice == "aesthetic_score":
         strategy = AestheticStrategy(sub_option=sub_choice or "general")
     elif choice == "technical_quality":
@@ -64,8 +59,6 @@ async def get_advice(
         strategy = GenreStrategy()
     else:
         raise HTTPException(status_code=400, detail="Invalid strategy choice.")
-
-    # Execute the strategy to get the advice
     advisor = Context(strategy)
     advice = advisor.execute(image)
 
@@ -79,9 +72,18 @@ async def get_advice(
 @router.get("/sub_options")
 async def get_sub_options(main_choice: str):
     sub_option_map = {
-        "aesthetic_score": ["composition", "chromatic", "general"],
-        "general_advice": ["style", "technical", "aesthetic"]
+        "aesthetic_score": ["composition", "chromatic", "general"]
     }
 
     sub_options = sub_option_map.get(main_choice, [])
     return {"sub_options": sub_options}
+
+@router.post("/general_advice")
+async def get_general_advice(
+    sub_choice: Optional[str] = Form(None),
+    sub_sub_option: Optional[str] = Form(None)
+):
+    strategy = GeneralAdviceStrategy(sub_option=sub_choice, sub_sub_option=sub_sub_option)
+    advisor = Context(strategy)
+    advice = advisor.execute(None) 
+    return advice  

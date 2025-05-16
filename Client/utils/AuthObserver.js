@@ -5,6 +5,7 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signOut,
+  getAuth,
 } from "firebase/auth";
 import {
   EmailAuthProvider,
@@ -12,6 +13,7 @@ import {
   updatePassword as firebaseUpdatePassword,
   updateEmail as firebaseUpdateEmail,
 } from "firebase/auth";
+import { sendPasswordResetEmail } from "firebase/auth";
 import { getFirestore, setDoc, doc } from "firebase/firestore";
 import Constants from 'expo-constants';
 const API_URL = Constants.expoConfig.extra.API_URL_DATA;
@@ -132,7 +134,14 @@ class AuthObserver {
     const credential = EmailAuthProvider.credential(user.email, currentPassword);
     return await reauthenticateWithCredential(user, credential);
   }
-
+  async getToken() {
+    const user = getAuth().currentUser;
+    if (user) {
+      return await user.getIdToken();
+    }
+    return null;
+  }
+  
   async updatePassword(newPassword, currentPassword) {
     const user = this.getCurrentUser();
     if (!user) throw new Error("No user signed in");
@@ -144,6 +153,16 @@ class AuthObserver {
     const user = this.getCurrentUser();
     if (!user) throw new Error("No user signed in");
     return await firebaseUpdateEmail(user, newEmail);
+  }
+
+  async sendPasswordReset(email) {
+    try {
+      await sendPasswordResetEmail(auth, email);
+      return true;
+    } catch (error) {
+      console.error("Password reset error:", error.message);
+      throw new Error(error.message);
+    }
   }
 
   cleanup() {

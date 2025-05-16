@@ -19,6 +19,7 @@ import { subscribeToPostChange } from "../../../utils/PostEvent";
 import Toast from "react-native-toast-message";
 import { emit } from "../../../utils/EventBus";
 import Constants from 'expo-constants';
+import authorizedFetch from "../../../utils/authorizedFetch";
 const API_URL = Constants.expoConfig.extra.API_URL_DATA;
 
 
@@ -36,7 +37,7 @@ export default function PostDetails({ post, userId, showClose, onClose, onPostDe
 
   const fetchUserData = async (userId) => {
     try {
-      const response = await fetch(`${API_URL}/users/${userId}`);
+      const response = await authorizedFetch(`${API_URL}/users/${userId}`);
       const data = await response.json();
       setUserName(data.name);
     } catch (error) {
@@ -52,7 +53,7 @@ export default function PostDetails({ post, userId, showClose, onClose, onPostDe
   useEffect(() => {
     const fetchUpdatedPost = async () => {
       try {
-        const res = await fetch(`${API_URL}/posts/${post.postId}`);
+        const res = await authorizedFetch(`${API_URL}/posts/${post.postId}`);
         if (!res.ok) throw new Error("Failed to refetch post data");
         const updatedPost = await res.json();
         setEditedCaption(updatedPost.caption);
@@ -89,7 +90,7 @@ export default function PostDetails({ post, userId, showClose, onClose, onPostDe
   useEffect(() => {
     const fetchUserRating = async () => {
       try {
-        const res = await fetch(`${API_URL}/rating/${post.postId}/${userId}`);
+        const res = await authorizedFetch(`${API_URL}/rating/${post.postId}/${userId}`);
         if (!res.ok) throw new Error("Failed to fetch user rating");
         const data = await res.json();
         setUserRating(data ?? 0);
@@ -106,7 +107,7 @@ export default function PostDetails({ post, userId, showClose, onClose, onPostDe
     
     const fetchAverageRating = async () => {
       try {
-        const res = await fetch(`${API_URL}/rating/average/${post.postId}`);
+        const res = await authorizedFetch(`${API_URL}/rating/average/${post.postId}`);
         if (!res.ok) throw new Error("Failed to fetch average rating");
         const data = await res.json();
         setAverageRating(data ?? 0);
@@ -128,12 +129,12 @@ export default function PostDetails({ post, userId, showClose, onClose, onPostDe
   const handleRatingChange = async (newRating) => {
     setRating(newRating);
     try {
-      await fetch(`${API_URL}/rating/${post.postId}/${userId}/${newRating}`, {
+      await authorizedFetch(`${API_URL}/rating/${post.postId}/${userId}/${newRating}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
       });
   
-      const res = await fetch(`${API_URL}/rating/average/${post.postId}`);
+      const res = await authorizedFetch(`${API_URL}/rating/average/${post.postId}`);
       if (!res.ok) throw new Error("Failed to fetch average rating");
       setAverageRating(await res.json());
       emitPostChange();

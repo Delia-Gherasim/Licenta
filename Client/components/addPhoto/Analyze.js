@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { uploadToCloudinary } from "../../utils/CloudinaryConfig";
+import * as FileSystem from "expo-file-system";
 import { Dimensions } from "react-native";
 import TextResponse from "./TextResponse";
 import Constants from 'expo-constants';
@@ -27,13 +28,12 @@ export default function Analyze({ route }) {
   const [showCameraAnimation, setShowCameraAnimation] = useState(false);
   const scrollViewRef = useRef();
 
-  const API_URL = Constants.expoConfig.extra.API_URL_CHATBOT;
+  const API_URL = Constants.manifest.extra.API_URL_CHATBOT;
   const optionLabels = {
     aesthetic_score: "Aesthetic Score",
     technical_quality: "Technical Quality",
     object_advice: "Object Advice",
     scene_advice: "Scene Advice",
-    general_advice: "General Advice",
     genre_advice: "Genre Advice",
   };
   useEffect(() => {
@@ -72,7 +72,19 @@ export default function Analyze({ route }) {
       const res = await fetch(
         `${API_URL}/sub_options?main_choice=${mainChoice}`
       );
+       if (!res.ok) {
+      // If server returns 404 or other errors, treat it as "no sub-options"
+      console.warn("No sub-options found, calling submitAdvice directly.");
+      submitAdvice(mainChoice, null);
+      return;
+    }
       const data = await res.json();
+      if (!data.sub_options || data.sub_options.length === 0) {
+      // No sub-options available
+      console.log("Empty sub-options list, submitting advice directly.");
+      submitAdvice(mainChoice, null);
+      return;
+    }
       setSubOptions(data.sub_options);
       if (data.sub_options.length > 0) {
         addMessage(

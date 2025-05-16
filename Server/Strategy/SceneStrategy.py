@@ -9,9 +9,9 @@ class SceneStrategy(Strategy):
     def __init__(self):
         super().__init__("scene_advice")
         self.classifier = SceneClassifier()
-        with open("C:\\Facultation\\licenta\\PhotographyAdviceApp\\Server\\sceneAdvice.json") as f:
+        with open("C:\Facultation\licenta\PhotographyAdviceApp\Server\Strategy\content\sceneAdvice.json") as f:
             self.scene_advice_data = json.load(f)
-        with open("C:\\Facultation\\licenta\\PhotographyAdviceApp\\Server\\places365Categoryes.json") as f:
+        with open("C:\Facultation\licenta\PhotographyAdviceApp\Server\Strategy\content\places365Categoryes.json") as f:
             self.category_data = json.load(f)
 
     def get_category_from_scene(self, scene_name):

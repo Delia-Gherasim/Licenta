@@ -1,27 +1,26 @@
 {
     "exposure": {
       "title": "What is Exposure in Photography?",
-      "description": "Exposure is the amount of light that reaches the camera sensor or film. It affects how light or dark an image appears. Exposure is controlled by the aperture, shutter speed, and ISO settings — collectively known as the exposure triangle.",
-      "components": {
+      "description": "Exposure is the amount of light that reaches the camera sensor or film. It affects how light or dark an image appears. Exposure is controlled by the aperture, shutter speed, and ISO settings — collectively known as the exposure triangle. Balancing these three settings is essential for achieving a properly exposed image. Overexposure loses highlight detail, underexposure loses shadow detail.",
+      "concepts": {
         "shutter_speed": {
           "description": "Controls how long the camera’s shutter stays open.",
-          "details": "Shutter speed influences brightness and motion capture. Fast speeds freeze action; slow speeds create motion blur or allow more light.",
-          "range": "1/8000s to 30s or more"
+          "details": "Shutter speed influences brightness and motion capture. Fast speeds freeze action; slow speeds create motion blur or allow more light. Can range from 1/8000s to 30s or more",
+          "image_link" : "https://kasefilters.de/media/b2/c4/85/1689349987/shutter-speed.jpg"
         },
         "aperture": {
           "description": "The size of the lens opening through which light enters.",
-          "details": "Measured in f-stops (e.g., f/1.4). A lower number means a wider opening, more light, and shallower depth of field. A higher number gives deeper focus and less light.",
-          "examples": ["f/1.4", "f/2.8", "f/16"]
+          "details": "Measured in f-stops (f/1.4, f/2.8, f/16). A lower number means a wider opening, more light, and shallower depth of field. A higher number gives deeper focus and less light.",
+          "image_link" : "https://outdoorphotographyschool.com/wp-content/uploads/2020/01/DOF-vs-Aperture-1200x431.jpg"
         },
         "iso": {
           "description": "The sensitivity of the camera's sensor to light.",
           "details": "Low ISO (e.g., 100) is best for bright light and reduces noise. High ISO (e.g., 1600+) helps in low light but increases noise.",
-          "image_link": "https://images.squarespace-cdn.com/content/v1/5013f4b2c4aaa4752ac69b17/d054f074-82e4-46e8-86e5-c52301c1eb37/WHAT+IS+ISO+IN+PHOTOGRAPHY-4.jpg?format=2500w"
+          "image_link": "https://images.squarespace-cdn.com/content/v1/51c08b7ce4b03e12b81f59a5/1537558396035-70D0ABM95HBA73TXC3LI/which-iso-should-i-use-diagramme-for-all-things-creative-01-01.png"
         }
-      },
-      "importance": "Balancing these three settings is essential for achieving a properly exposed image. Overexposure loses highlight detail, underexposure loses shadow detail."
+      }
     },
-    "focusing": {
+    "focus": {
       "title": "The Basics of Camera Focusing",
       "description": "Focusing adjusts the lens so that the desired subject appears sharp. Achieving accurate focus directs viewer attention and ensures clarity.",
       "concepts": {
@@ -31,27 +30,25 @@
         },
         "depth_of_field": {
           "description": "The range of distance in a photo that appears acceptably sharp.",
-          "factors": {
+          "concepts": {
             "aperture": "Smaller apertures (high f-stop) increase depth of field.",
             "subject_distance": "Closer subjects result in a shallower depth of field.",
-            "focal_length": "Longer lenses reduce depth of field."
+            "focal_length": "Longer lenses reduce depth of field.",
+            "image_link" : "https://www.mefoto.com/wp-content/uploads/2024/06/Depth-Of-Field-In-Photography-1024x613.jpg"
           }
         }
       },
       "challenges_and_solutions": {
-        "low_light": [
-          "Use lenses with wider maximum apertures",
-          "Increase ISO (accepting more noise)",
-          "Use built-in focus assist light",
-          "Switch to manual focus if autofocus fails",
-          "Use a lit object to focus, then switch to manual"
-        ],
-        "fast_moving_subjects": [
-          "Use continuous autofocus (AF-C or AI-Servo)",
-          "Increase autofocus sensitivity",
-          "Pan with the subject",
-          "Pre-focus on a spot the subject will pass through"
-        ]
+        "low_light": {
+          "challenge":"Bad lighting conditions",
+          "solution":"Use lenses with wider maximum apertures, increase ISO (accepting more noise), use built-in focus assist light, switch to manual focus if autofocus fails, use a lit object to focus, then switch to manual",
+          "image_link":""
+        },
+        "fast_moving_subjects": {
+          "challenge":"Fast moving subject",
+          "solution":"Use continuous autofocus (AF-C or AI-Servo), increase autofocus sensitivity, pan with the subject, pre-focus on a spot the subject will pass through",
+          "image_link":"https://www.camerahouse.com.au/media/magefan_blog/2016/06/Panning-shot-of-Cyclist.jpg"
+        }
       }
     }
   }

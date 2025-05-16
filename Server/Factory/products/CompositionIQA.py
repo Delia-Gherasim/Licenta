@@ -2,25 +2,13 @@ import cv2
 import numpy as np
 from Factory.products.BaseModel import BaseModel
 from PIL import Image
-import random
 import torch
-from transformers import CLIPProcessor, CLIPModel
 
 class CompositionIQA(BaseModel):
-    def __init__(self):
-        self.device = "cuda" if torch.cuda.is_available() else "cpu"
-        self.clip_model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32").to(self.device)
-        self.processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
-        self.prompts = [
-            "a photo with excellent composition, following photography aesthetic principles", "photo with good composition, following photography aesthetic principles",
-            "a photo with decent composition, maybe following photography aesthetic principles", "a photo with average composition, not following photography aesthetic principles",
-            "a photo with bad composition, not following photography aesthetic principles",
-        ]
+    def _preprocess(self, image):
+        return np.array(image)[:, :, ::-1] 
 
-    def preprocess(self, image):
-        return np.array(image)[:, :, ::-1]  
-
-    def rule_of_thirds(self, image):
+    def _rule_of_thirds(self, image):
         h, w = image.shape[:2]
         thirds_x = [w // 3, 2 * w // 3]
         thirds_y = [h // 3, 2 * h // 3]
@@ -41,7 +29,7 @@ class CompositionIQA(BaseModel):
                     score += 1
         return 1 if score > 0 else 0
 
-    def leading_lines(self, image):
+    def _leading_lines(self, image):
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         edges = cv2.Canny(gray, 50, 150, apertureSize=3)
         lines = cv2.HoughLines(edges, 1, np.pi / 180, 120)
@@ -52,54 +40,49 @@ class CompositionIQA(BaseModel):
         horizontals = [a for a in angles if a < np.pi / 8 or a > 7 * np.pi / 8]
         return 1 if len(verticals + horizontals) >= 5 else 0
 
-    def check_symmetry(self, image):
+    def _check_symmetry(self, image):
         h, w = image.shape[:2]
         if w % 2 != 0:
             w -= 1
-            image = image[:, :-1]  
+            image = image[:, :-1]
+        if h % 2 != 0:
+            h -= 1
+            image = image[:-1, :]
 
         left = image[:, :w // 2]
         right = cv2.flip(image[:, w // 2:], 1)
-
-        if h % 2 != 0:
-            h -= 1
-            image = image[:-1, :] 
 
         top = image[:h // 2, :]
         bottom = cv2.flip(image[h // 2:, :], 0)
 
         diff_vertical = cv2.absdiff(left, right)
-        score_vertical = np.mean(diff_vertical)
-        
         diff_horizontal = cv2.absdiff(top, bottom)
+
+        score_vertical = np.mean(diff_vertical)
         score_horizontal = np.mean(diff_horizontal)
-        
+
         return {
             "vertical_symmetry_score": score_vertical,
             "horizontal_symmetry_score": score_horizontal
         }
 
-
-
-    def clip_score(self, image_pil):
-        inputs = self.processor(text=self.prompts, images=image_pil, return_tensors="pt", padding=True).to(self.device)
-        outputs = self.clip_model(**inputs)
-        logits_per_image = outputs.logits_per_image
-        probs = logits_per_image.softmax(dim=1)
-        good_score = probs[0][0].item()
-        return good_score  
-
     def predict(self, image_pil):
-        image_cv2 = self.preprocess(image_pil)
+        image_cv2 = self._preprocess(image_pil)
 
-        rule_thirds_score = self.rule_of_thirds(image_cv2)
-        leading_lines_score = self.leading_lines(image_cv2)
-        symmetry_score = self.check_symmetry(image_cv2)
-        clip_composition_score = self.clip_score(image_pil)
+        rule_thirds_score = self._rule_of_thirds(image_cv2)
+        leading_lines_score = self._leading_lines(image_cv2)
+        symmetry_score_dict = self._check_symmetry(image_cv2)
+
+        symmetry_score = 0
+        for val in symmetry_score_dict.values():
+            symmetry_score += max(0, 1 - (val / 255.0))
+        symmetry_score /= 2
+
+        overall_score = round((rule_thirds_score + leading_lines_score + symmetry_score) / 3, 2)
 
         return {
             "rule_of_thirds": rule_thirds_score,
             "leading_lines": leading_lines_score,
-            "symmetry": symmetry_score,
-            "clip_composition_score": clip_composition_score
+            "symmetry": symmetry_score_dict,
+            "overall_composition_score": overall_score,
         }

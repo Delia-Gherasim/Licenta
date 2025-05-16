@@ -9,6 +9,7 @@ import {
 import VoteButtons from "../VoteButtons";
 import ReplyInput from "./ReplyInput";
 import Constants from 'expo-constants';
+import authorizedFetch from "../../../utils/authorizedFetch";
 const API_URL = Constants.expoConfig.extra.API_URL_DATA;
 
 const CommentItem = ({
@@ -41,7 +42,7 @@ const CommentItem = ({
 
   const fetchUserData = async (userId) => {
     try {
-      const response = await fetch(`${API_URL}/users/${userId}`);
+      const response = await authorizedFetch(`${API_URL}/users/${userId}`);
       const data = await response.json();
       setUserName(data.name);
     } catch (error) {
@@ -51,7 +52,7 @@ const CommentItem = ({
 
   const handleDelete = async () => {
     try {
-      await fetch(`${API_URL}/comments/${commentId}`, {
+      await authorizedFetch(`${API_URL}/comments/${commentId}`, {
         method: "DELETE",
       });
       onDelete(commentId);

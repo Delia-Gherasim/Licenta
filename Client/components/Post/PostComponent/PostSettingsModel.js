@@ -10,6 +10,7 @@ import {
 import Toast from 'react-native-toast-message';
 import { emitPostChange } from "../../../utils/PostEvent";
 import Constants from 'expo-constants';
+import authorizedFetch from "../../../utils/authorizedFetch";
 const API_URL = Constants.expoConfig.extra.API_URL_DATA;
 
 const extractHashtags = (caption) => {
@@ -43,7 +44,7 @@ export default function PostSettingsModal({
     };
   
     try {
-      const res = await fetch(`${API_URL}/posts/${post.postId}`, {
+      const res = await authorizedFetch(`${API_URL}/posts/${post.postId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
@@ -74,7 +75,7 @@ export default function PostSettingsModal({
   
   const handleDelete = async () => {
     try {
-      const res = await fetch(
+      const res = await authorizedFetch(
         `${API_URL}/posts/${post.postId}/${currentUserId}`,
         { method: "DELETE" }
       );

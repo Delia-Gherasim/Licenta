@@ -22,6 +22,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Dimensions } from "react-native";
 import { subscribe } from "../../utils/EventBus";
 import Constants from 'expo-constants';
+import authorizedFetch from "../../utils/authorizedFetch";
 const API_URL = Constants.expoConfig.extra.API_URL_DATA;
 const UserProfile = () => {
     const [userData, setUserData] = useState(null);
@@ -36,6 +37,8 @@ const UserProfile = () => {
     const { width: screenWidth } = useWindowDimensions();
     const [wasOffline, setWasOffline] = useState(false);
     const [numColumns, setNumColumns] = useState(2);
+    const [tip, setTip] = useState(null); 
+      const [isModalVisible, setIsModalVisible] = useState(false);
 
     useEffect(() => {
         if (screenWidth < 500) setNumColumns(2);
@@ -110,7 +113,7 @@ const UserProfile = () => {
 
     const fetchUserData = async () => {
         try {
-            const res = await fetch(`${API_URL}/users/${userId}`);
+            const res = await authorizedFetch(`${API_URL}/users/${userId}`);
             if (!res.ok) throw new Error("Server error");
             const json = await res.json();
             setUserData(json);
@@ -124,7 +127,7 @@ const UserProfile = () => {
 
     const fetchUserPosts = async () => {
         try {
-            const res = await fetch(`${API_URL}/posts/all/${userId}`);
+            const res = await authorizedFetch(`${API_URL}/posts/all/${userId}`);
             if (!res.ok) throw new Error("Server error");
             const json = await res.json();
             const top5 = json.posts?.slice(0, 5) || [];
@@ -136,6 +139,27 @@ const UserProfile = () => {
             setTimeout(() => setMessage(""), 5000);
         }
     };
+
+    const fetchTipOfTheDay = async () => {
+      try {
+          const formData = new FormData();  
+          const response = await fetch("http://localhost:8000/chatbot/general_advice", {
+              method: "POST",
+              body: formData
+          });
+  
+          if (!response.ok) {
+              throw new Error("Failed to fetch tip");
+          }
+  
+          const data = await response.json();
+          return data;
+      } catch (error) {
+          console.error("Error fetching tip of the day:", error);
+          return null;
+      }
+  };
+  
 
     const openPostDetails = (post) => {
         if (selectedPostDetails && selectedPostDetails.postId === post.postId) {
@@ -198,6 +222,21 @@ const UserProfile = () => {
                 >
                   <View style={styles.headerContainer}>
                   <View style={styles.headerIconsRow}>
+                  <TouchableOpacity
+  onPress={async () => {
+    const fetchedTip = await fetchTipOfTheDay();
+    if (fetchedTip) {
+      setTip(fetchedTip);
+      setIsModalVisible(true);
+    } else {
+      Alert.alert("Error", "Could not fetch tip of the day.");
+    }
+  }}
+  style={styles.iconButton}
+>
+  <Ionicons name="bulb-outline" size={24} color="#333" />
+</TouchableOpacity>
+
                     <TouchableOpacity
                       onPress={() => navigation.navigate("Notification")}
                       style={styles.iconButton}
@@ -224,9 +263,14 @@ const UserProfile = () => {
                     <Text style={styles.bio}>{userData.bio || "No bio available"}</Text>
                     <View style={styles.ratingRow}>
                       <Ionicons name="star" size={16} color="#f4c542" style={{ marginRight: 4 }} />
+                     <View style={{flexDirection: "column"}}>
                       <Text style={styles.rating}>
-                        Posts Rating: {userData.postRating || "0"}
+                        Skill: {userData.postRating || "0"}
                       </Text>
+                      <Text style={styles.rating}>
+                        Credibility: {userData.commentsLikes || "0"}
+                      </Text>
+                    </View>
                     </View>
                   </View>
       
@@ -330,7 +374,67 @@ const UserProfile = () => {
                 </View>
               </View>
             </Modal>
-      
+            <Modal
+              visible={isModalVisible}
+              onRequestClose={() => setIsModalVisible(false)}
+              transparent={true}
+              animationType="fade"
+            >
+              <View style={styles.modalOverlay}>
+                <View style={styles.popupContainer}>
+                  <View style={styles.modalHeader}>
+                    <Text style={styles.modalTitle}>{tip?.title || "Tip of the Day"}</Text>
+                    <TouchableOpacity onPress={() => setIsModalVisible(false)}>
+                      <Ionicons name="close-circle" size={24} color="#333" />
+                    </TouchableOpacity>
+                  </View>
+                  <View style={styles.popupContent}>
+                    {tip?.description && Array.isArray(tip.description) ? (
+                      tip.description.map((desc, index) => (
+                        <Text key={index} style={styles.tipDescription}>
+                          {desc}
+                        </Text>
+                      ))
+                    ) : (
+                      <Text style={styles.tipDescription}>{tip?.description}</Text>
+                    )}
+
+                    {tip?.details && (
+                      <View style={styles.tipDetailsContainer}>
+                        <Text style={styles.tipDetailsTitle}>Details:</Text>
+
+                        {typeof tip.details === "string" ? (
+                          <Text style={styles.tipDetail}>{tip.details}</Text>
+                        ) : 
+                        Array.isArray(tip.details) ? (
+                          tip.details.length > 1 ? (
+                            tip.details.map((detail, index) => (
+                              <Text key={index} style={styles.tipDetail}>
+                                - {detail}
+                              </Text>
+                            ))
+                          ) : (
+                            <Text style={styles.tipDetail}>
+                              - {tip.details[0]}
+                            </Text>
+                          )
+                        ) : null}
+
+                      </View>
+                    )}
+
+                    {tip?.image_link && (
+                      <Image
+                        source={{ uri: tip.image_link }}
+                        style={styles.tipImage}
+                        resizeMode="contain"
+                      />
+                    )}
+                  </View>
+                </View>
+              </View>
+            </Modal>
+
             <View style={styles.bottomSpace} />
           </ScrollView>
         </View>
@@ -339,6 +443,13 @@ const UserProfile = () => {
 };
 const screenHeight = Dimensions.get('window').height;
 const styles = StyleSheet.create({
+  tipImage: {
+    width: '100%',
+    height: 200, 
+    marginTop: 12,
+    borderRadius: 10,
+    backgroundColor: '#eaeaea',
+  },  
     mainContentContainer: {
         width: "100%",
         flexGrow: 1,

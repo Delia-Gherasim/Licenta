@@ -41,42 +41,51 @@ class PostsService:
             return {"error": "Invalid user ID"}
         return await self.retry(self.repo.get_user_posts_from_firestore, user_id)
     
+    import asyncio
+
     async def get_all_posts_for_user(self, user_id: str):
-        if not await self._validate_user(user_id):
-            return {"error": "Invalid user ID"}
+        try:
+            if not await self._validate_user(user_id):
+                return {"error": "Invalid user ID"}
 
-        # Fetch user data
-        user_data = await self.retry(self.user_repo.get_user_by_id, user_id)
-        if not user_data or "error" in user_data:
-            return {"error": "User data not found"}
+            user_data = await self.retry(self.user_repo.get_user_by_id, user_id)
+            if not user_data or "error" in user_data:
+                return {"error": "User data not found"}
 
-        # Collect user IDs: mutuals, only-following, and only-followers
-        following = set(user_data.get("following", []))
-        followers = set(user_data.get("followers", []))
-        mutuals = following & followers
-        only_following = following - mutuals
-        only_followers = followers - mutuals
+            following = set(user_data.get("following", []))
+            followers = set(user_data.get("followers", []))
+            mutuals = following & followers
 
-        # Combine all user IDs to check for posts from
-        all_user_ids = list(mutuals) + list(only_following) + list(only_followers)
+            followed_user_ids = list(following)
 
-        posts_by_priority = []
+            user_priority = {uid: 1 if uid in mutuals else 2 for uid in followed_user_ids}
 
-        # Fetch posts for each user in all_user_ids
-        tasks = [
-            self.retry(self.repo.get_user_posts_from_firestore, uid)
-            for uid in all_user_ids
-        ]
-        results = await asyncio.gather(*tasks)
+            tasks = [
+                self.retry(self.repo.get_user_posts_from_firestore, uid)
+                for uid in followed_user_ids
+            ]
+            results = await asyncio.gather(*tasks, return_exceptions=True)
 
-        for uid, posts in zip(all_user_ids, results):
-            if posts and isinstance(posts, dict):
-                posts_list = posts.get('posts', [])
-                if posts_list:
-                    for p in posts_list:
-                        posts_by_priority.append(p)
-                
-        return {"posts" : posts_by_priority}
+            posts_by_priority = []
+
+            for uid, result in zip(followed_user_ids, results):
+                if isinstance(result, Exception):
+                    continue
+                if result and isinstance(result, dict):
+                    posts_list = result.get('posts', [])
+                    for post in posts_list:
+                        posts_by_priority.append({
+                            "priority": user_priority.get(uid, 2),
+                            "post": post
+                        })
+
+            sorted_posts = sorted(posts_by_priority, key=lambda x: x["priority"])
+
+            return {"posts": [item["post"] for item in sorted_posts]}
+
+        except Exception as e:
+            return {"error": f"Unexpected error: {str(e)}"}
+
 
     async def get_all_posts(self):
         result = await self.retry(self.repo.get_all_posts_from_firestore)
@@ -169,14 +178,11 @@ class PostsService:
         ]
         
         await asyncio.gather(*tasks)
-        
-        # Check if user has remaining posts
+
         remaining_posts = await self.repo.get_user_posts_from_firestore(user_id)
         if not remaining_posts.get('posts'):  
-            # Set user's rating to 0 if no posts exist
             await self.user_repo.update_user_rating(user_id, 0)
-        
-        # Update the user's rating based on the remaining posts' ratings
+
         newUserRating = await self.repo.get_user_average_rating(post_data.get('userId'))
         await self.user_repo.update_user_rating(post_data.get('userId'), newUserRating)
 
@@ -196,7 +202,6 @@ class PostsService:
 
         remaining_posts = await self.repo.get_user_posts_from_firestore(user_id)
         if not remaining_posts.get('posts'):  
-            # Set user's rating to 0 if no posts exist
             await self.user_repo.update_user_rating(user_id, 0)
         
         return {"message": "All posts deleted"}

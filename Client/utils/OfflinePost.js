@@ -5,6 +5,9 @@ import { uploadToCloudinary } from "./CloudinaryConfig";
 import { emitPostAdded } from "./PostEvent";
 import Constants from 'expo-constants';
 const API_URL = Constants.expoConfig.extra.API_URL_DATA;
+import authorizedFetch from './authorizedFetch';
+import { auth } from './firebaseConfig';
+
 const useOfflinePostSync = () => {
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener(async (state) => {
@@ -34,7 +37,7 @@ const useOfflinePostSync = () => {
                 hashtags: post.hashtags || [],
               };
 
-              const response = await fetch(`${API_URL}/posts`, {
+              const response = await authorizedFetch(`${API_URL}/posts`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload),
@@ -72,7 +75,7 @@ export const retryOfflinePosts = async () => {
 
     for (const post of queue) {
       try {
-        const response = await fetch(`${API_URL}/posts`, {
+        const response = await authorizedFetch(`${API_URL}/posts`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(post),

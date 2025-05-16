@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Constants from 'expo-constants';
+import authorizedFetch from "../../../../utils/authorizedFetch";
 const API_URL = Constants.expoConfig.extra.API_URL_DATA;
 
 export default function useReplies(postId) {
@@ -7,7 +8,7 @@ export default function useReplies(postId) {
 
   const fetchReplies = async (parentCommentId) => {
     try {
-      const res = await fetch(
+      const res = await authorizedFetch(
         `${API_URL}/comments/post/${postId}/comment/${parentCommentId}`
       );
       const data = await res.json();

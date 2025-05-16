@@ -17,6 +17,7 @@ import PostDetails from "../Post/PostComponent/PostDetails";
 import { Ionicons } from '@expo/vector-icons';
 import Constants from 'expo-constants';
 const API_URL = Constants.expoConfig.extra.API_URL_DATA;
+import authorizedFetch from "../../utils/authorizedFetch";
 const AnotherProfile = () => {
   const [userData, setUserData] = useState(null);
   const [posts, setPosts] = useState([]);
@@ -59,7 +60,7 @@ const AnotherProfile = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const res = await fetch(`${API_URL}/users/${userId}`);
+        const res = await authorizedFetch(`${API_URL}/users/${userId}`);
         if (!res.ok) throw new Error("Server error");
         const json = await res.json();
         setUserData(json);
@@ -73,7 +74,7 @@ const AnotherProfile = () => {
 
     const fetchUserPosts = async () => {
       try {
-        const res = await fetch(`${API_URL}/posts/all/${userId}`);
+        const res = await authorizedFetch(`${API_URL}/posts/all/${userId}`);
         if (!res.ok) throw new Error("Server error");
         const json = await res.json();
         setPosts(json.posts || []);
@@ -97,7 +98,7 @@ const AnotherProfile = () => {
     try {
       const action = isFollowing ? "unfollow" : "follow";
       const url = `${API_URL}/users/${currentUserId}/${action}/${userId}`;
-      const res = await fetch(url, {
+      const res = await authorizedFetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
       });
@@ -106,7 +107,7 @@ const AnotherProfile = () => {
 
       setIsFollowing(!isFollowing);
 
-      const updatedRes = await fetch(`${API_URL}/users/${userId}`);
+      const updatedRes = await authorizedFetch(`${API_URL}/users/${userId}`);
       const updatedData = await updatedRes.json();
       setUserData(updatedData);
     } catch (err) {
